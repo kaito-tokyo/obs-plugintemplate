@@ -7,18 +7,9 @@
   },
   "configurePresets": [
     {
-      "name": "template",
-      "hidden": true,
-      "cacheVariables": {
-        "ENABLE_FRONTEND_API": false,
-        "ENABLE_QT": false
-      }
-    },
-    {
       "name": "macos",
-      "displayName": "macOS Universal",
-      "description": "Build for macOS 12.0+ (Universal binary)",
-      "inherits": ["template"],
+      "displayName": "macOS universal",
+      "description": "Build universal binary for macOS 12.0+",
       "binaryDir": "${sourceDir}/build_macos",
       "condition": {
         "type": "equals",
@@ -37,19 +28,17 @@
     {
       "name": "macos-ci",
       "inherits": ["macos"],
-      "displayName": "macOS Universal CI build",
-      "description": "Build for macOS 12.0+ (Universal binary) for CI",
-      "generator": "Xcode",
+      "displayName": "macOS (Production)",
+      "description": "Build universal binary for macOS 12.0+ (Production)",
+      "binaryDir": "${sourceDir}/build_prod",
       "cacheVariables": {
-        "CMAKE_COMPILE_WARNING_AS_ERROR": true,
-        "ENABLE_CCACHE": true
+        "BUILD_TESTING": false
       }
     },
     {
       "name": "windows-x64",
       "displayName": "Windows x64",
-      "description": "Build for Windows x64",
-      "inherits": ["template"],
+      "description": "Build x64 binary for Windows",
       "binaryDir": "${sourceDir}/build_x64",
       "condition": {
         "type": "equals",
@@ -63,17 +52,16 @@
     {
       "name": "windows-ci-x64",
       "inherits": ["windows-x64"],
-      "displayName": "Windows x64 CI build",
-      "description": "Build for Windows x64 on CI",
+      "displayName": "Windows x64 (Production)",
+      "description": "Build x64 binary for Windows (Production)",
       "cacheVariables": {
-        "CMAKE_COMPILE_WARNING_AS_ERROR": true
+        "BUILD_TESTING": false
       }
     },
     {
       "name": "ubuntu-x86_64",
       "displayName": "Ubuntu x86_64",
-      "description": "Build for Ubuntu x86_64",
-      "inherits": ["template"],
+      "description": "Build x86_64 binary for Ubuntu",
       "binaryDir": "${sourceDir}/build_x86_64",
       "condition": {
         "type": "equals",
@@ -90,12 +78,10 @@
     {
       "name": "ubuntu-ci-x86_64",
       "inherits": ["ubuntu-x86_64"],
-      "displayName": "Ubuntu x86_64 CI build",
-      "description": "Build for Ubuntu x86_64 on CI",
+      "displayName": "Ubuntu x86_64 (Production)",
+      "description": "Build x86_64 binary for Ubuntu (Production)",
       "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "RelWithDebInfo",
-        "CMAKE_COMPILE_WARNING_AS_ERROR": true,
-        "ENABLE_CCACHE": true
+        "BUILD_TESTING": false
       }
     }
   ],
@@ -103,43 +89,66 @@
     {
       "name": "macos",
       "configurePreset": "macos",
-      "displayName": "macOS Universal",
-      "description": "macOS build for Universal architectures",
+      "displayName": "macOS universal",
+      "description": "Build universal binary for macOS 12.0+",
       "configuration": "RelWithDebInfo"
     },
     {
       "name": "macos-ci",
       "configurePreset": "macos-ci",
-      "displayName": "macOS Universal CI",
-      "description": "macOS CI build for Universal architectures",
+      "displayName": "macOS universal (Production)",
+      "description": "Build universal binary for macOS 12.0+ (Production)",
       "configuration": "RelWithDebInfo"
     },
     {
       "name": "windows-x64",
       "configurePreset": "windows-x64",
       "displayName": "Windows x64",
-      "description": "Windows build for x64",
+      "description": "Build x64 binary for Windows",
       "configuration": "RelWithDebInfo"
     },
     {
       "name": "windows-ci-x64",
       "configurePreset": "windows-ci-x64",
-      "displayName": "Windows x64 CI",
-      "description": "Windows CI build for x64 (RelWithDebInfo configuration)",
+      "displayName": "Windows x64 (Production)",
+      "description": "Build x64 binary for Windows (Production)",
       "configuration": "RelWithDebInfo"
     },
     {
       "name": "ubuntu-x86_64",
       "configurePreset": "ubuntu-x86_64",
       "displayName": "Ubuntu x86_64",
-      "description": "Ubuntu build for x86_64",
+      "description": "Build x86_64 binary for Ubuntu",
       "configuration": "RelWithDebInfo"
     },
     {
       "name": "ubuntu-ci-x86_64",
       "configurePreset": "ubuntu-ci-x86_64",
-      "displayName": "Ubuntu x86_64 CI",
-      "description": "Ubuntu CI build for x86_64",
+      "displayName": "Ubuntu x86_64 (Production)",
+      "description": "Build x86_64 binary for Ubuntu (Production)",
+      "configuration": "RelWithDebInfo"
+    }
+  ],
+  "testPresets": [
+    {
+      "name": "macos",
+      "configurePreset": "macos",
+      "displayName": "macOS universal",
+      "description": "Test universal binary for macOS 12.0+",
+      "configuration": "RelWithDebInfo"
+    },
+    {
+      "name": "windows-x64",
+      "configurePreset": "windows-x64",
+      "displayName": "Windows x64",
+      "description": "Test x64 binary for Windows",
+      "configuration": "RelWithDebInfo"
+    },
+    {
+      "name": "ubuntu-x86_64",
+      "configurePreset": "ubuntu-x86_64",
+      "displayName": "Ubuntu x86_64",
+      "description": "Test x86_64 binary for Ubuntu",
       "configuration": "RelWithDebInfo"
     }
   ]
