@@ -47,6 +47,9 @@ jobs:
         run: scripts/build-obs-studio-macos.sh
 
       - name: Configure
+        env:
+            CODESIGN_IDENT: ${{ secrets.CODESIGN_IDENT }}
+            CODESIGN_TEAM: ${{ secrets.CODESIGN_TEAM }}
         run: cmake --preset macos
 
       - name: Build
