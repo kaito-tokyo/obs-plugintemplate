@@ -230,6 +230,13 @@ jobs:
           path: release/*.deb
           if-no-files-found: error
 
+      - name: Upload ddeb
+        uses: actions/upload-artifact@v6
+        with:
+          name: ${{ github.event.repository.name }}-deb-ubuntu-24.04-x86_64-${{ github.run_number }}-dbgsym
+          path: release/*.ddeb
+          if-no-files-found: error
+
   create-release:
     name: Create Release
 
