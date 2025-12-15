@@ -157,7 +157,7 @@ jobs:
         uses: actions/upload-artifact@v6
         with:
           name: ${{ github.event.repository.name }}-dsym-macos-universal-${{ github.run_number }}
-          path: build_macos/RelWithDebInfo/$NAME.dSYM.zip
+          path: build_macos/RelWithDebInfo/${{ fromJson(steps.metadata.outputs.buildspec).name }}.dSYM.zip
           if-no-files-found: error
 
       - name: Save libobs cache
