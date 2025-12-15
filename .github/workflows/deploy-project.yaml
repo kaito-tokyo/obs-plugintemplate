@@ -261,7 +261,12 @@ jobs:
       - name: Download Ubuntu deb
         uses: actions/download-artifact@v6
         with:
-          name: ${{ github.event.repository.name }}-linux-deb-${{ github.run_number }}
+          name: ${{ github.event.repository.name }}-deb-ubuntu-24.04-x86_64-${{ github.run_number }}
+
+      - name: Download Ubuntu ddeb
+        uses: actions/download-artifact@v6
+        with:
+          name: ${{ github.event.repository.name }}-deb-ubuntu-24.04-x86_64-${{ github.run_number }}-dbgsym
 
       - name: Create Draft Release
         env:
