@@ -1,7 +1,7 @@
-name: Build Project
+name: Deploy Project
 
 on:
-  pull_request:
+  push:
     branches: [main, master, develop]
 
 concurrency:
@@ -16,12 +16,14 @@ permissions:
   contents: read
 
 jobs:
-  macos-build:
-    name: macOS Build
+  macos-deploy:
+    name: macOS Deploy
 
     runs-on: macos-15
 
     timeout-minutes: 30
+
+    environment: production-macos
 
     steps:
       - name: Checkout
@@ -44,9 +46,3 @@ jobs:
       - name: Build
         run: cmake --build --preset macos
 
-      - name: Upload Build Artifacts
-        uses: actions/upload-artifact@v6
-        with:
-          name: ${{ github.event.repository.name }}-${{ github.event_name }}-macos-universal-${{ github.run_number }}
-          path: build_macos/rundir/RelWithDebInfo/*.plugin
-          if-no-files-found: error
