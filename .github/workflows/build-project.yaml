@@ -29,13 +29,40 @@ jobs:
         with:
           submodules: recursive
 
+      - name: Read metadata
+        id: metadata
+        run: |
+          {
+            echo "buildspec<<EOF"
+            jq -c . buildspec.json
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+          echo "ImageVersion=$ImageVersion" >> "$GITHUB_OUTPUT"
+
       - name: Install dependencies via Homebrew
         run: brew install cmake
 
+      - name: Restore libobs cache
+        uses: actions/cache/restore@v4
+        id: libobs-cache
+        with:
+          path: |
+            .deps/Frameworks
+            .deps/include
+            .deps/lib
+            .deps/obs-studio-${{ fromJson(steps.metadata.outputs.buildspec).dependencies.obs-studio.version }}
+          key: macos-libobs-${{ hashFiles('buildspec.json') }}-${{ runner.arch }}-${{ steps.metadata.outputs.ImageVersion }}
+
+      - name: Download dependencies without obs-studio
+        if: steps.libobs-cache.outputs.cache-hit == 'true'
+        run: cmake -DWITH_OBS_STUDIO=OFF -P scripts/download-deps.cmake
+
       - name: Download dependencies
+        if: steps.libobs-cache.outputs.cache-hit != 'true'
         run: cmake -P scripts/download-deps.cmake
 
       - name: Build libobs
+        if: steps.libobs-cache.outputs.cache-hit != 'true'
         run: scripts/build-obs-studio-macos.sh
 
       - name: Configure
