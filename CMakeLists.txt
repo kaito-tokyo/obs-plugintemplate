@@ -28,18 +28,29 @@ set(CMAKE_C_VISIBILITY_PRESET hidden)
 set(CMAKE_CXX_VISIBILITY_PRESET hidden)
 set(CMAKE_VISIBILITY_INLINES_HIDDEN TRUE)
 
-list(PREPEND CMAKE_PREFIX_PATH
-"${CMAKE_CURRENT_SOURCE_DIR}/.deps/Frameworks"
-"${CMAKE_CURRENT_SOURCE_DIR}/.deps"
-"${CMAKE_CURRENT_SOURCE_DIR}/.deps/obs-deps-qt6-2025-07-11-universal"
-"${CMAKE_CURRENT_SOURCE_DIR}/.deps/obs-deps-2025-07-11-universal"
+list(
+  PREPEND
+  CMAKE_PREFIX_PATH
+  "${CMAKE_CURRENT_SOURCE_DIR}/.deps/Frameworks"
+  "${CMAKE_CURRENT_SOURCE_DIR}/.deps"
+  "${CMAKE_CURRENT_SOURCE_DIR}/.deps/obs-deps-qt6-2025-07-11-universal"
+  "${CMAKE_CURRENT_SOURCE_DIR}/.deps/obs-deps-2025-07-11-universal"
 )
 
 if(MSVC)
-  # TBD
+  list(
+    PREPEND
+    CMAKE_PREFIX_PATH
+    "${CMAKE_CURRENT_SOURCE_DIR}/.deps/obs-deps-qt6-${QT6_VERSION}-x64"
+    "${CMAKE_CURRENT_SOURCE_DIR}/.deps/obs-deps-${PREBUILT_VERSION}-x64"
+  )
 elseif(APPLE)
-  list(PREPEND CMAKE_PREFIX_PATH "${CMAKE_CURRENT_SOURCE_DIR}/.deps/obs-deps-qt6-${QT6_VERSION}-universal"
-  "${CMAKE_CURRENT_SOURCE_DIR}/.deps/obs-deps-${PREBUILT_VERSION}-universal")
+  list(
+    PREPEND
+    CMAKE_PREFIX_PATH
+    "${CMAKE_CURRENT_SOURCE_DIR}/.deps/obs-deps-qt6-${QT6_VERSION}-universal"
+    "${CMAKE_CURRENT_SOURCE_DIR}/.deps/obs-deps-${PREBUILT_VERSION}-universal"
+  )
 endif()
 
 find_package(libobs REQUIRED)

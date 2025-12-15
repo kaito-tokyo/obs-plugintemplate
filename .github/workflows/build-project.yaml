@@ -40,7 +40,7 @@ jobs:
           echo "ImageVersion=$ImageVersion" >> "$GITHUB_OUTPUT"
 
       - name: Install dependencies via Homebrew
-        run: brew install cmake
+        run: brew install -q cmake
 
       - name: Restore libobs cache
         uses: actions/cache/restore@v5
@@ -51,7 +51,7 @@ jobs:
             .deps/include
             .deps/lib
             .deps/obs-studio-${{ fromJson(steps.metadata.outputs.buildspec).dependencies.obs-studio.version }}
-          key: macos-libobs-${{ hashFiles('buildspec.json') }}-${{ runner.arch }}-${{ steps.metadata.outputs.ImageVersion }}
+          key: ${{ runner.os }}-libobs-${{ hashFiles('buildspec.json') }}-${{ runner.arch }}-${{ steps.metadata.outputs.ImageVersion }}
 
       - name: Download dependencies without obs-studio
         if: steps.libobs-cache.outputs.cache-hit == 'true'
@@ -74,7 +74,7 @@ jobs:
       - name: Upload Build Artifacts
         uses: actions/upload-artifact@v6
         with:
-          name: ${{ github.event.repository.name }}-bundle-macos-universal-${{ github.run_number }}
+          name: ${{ fromJson(steps.metadata.outputs.buildspec).name }}-bundle-macos-universal-${{ github.run_number }}
           path: build_macos/rundir/RelWithDebInfo/*.plugin
           if-no-files-found: error
 
@@ -115,3 +115,96 @@ jobs:
 
       - name: Build
         run: cmake --build --preset ubuntu-x86_64
+
+  windows-build:
+    name: Windows Build
+
+    runs-on: windows-2022
+
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          submodules: recursive
+
+      - name: Read metadata
+        id: metadata
+        shell: bash
+        run: |
+          {
+            echo "buildspec<<EOF"
+            jq -c . buildspec.json
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+          echo "ImageVersion=$ImageVersion" >> "$GITHUB_OUTPUT"
+
+      - name: Restore libobs cache
+        uses: actions/cache/restore@v5
+        id: libobs-cache
+        with:
+          path: |
+            .deps/bin
+            .deps/cmake
+            .deps/include
+            .deps/lib
+            .deps/obs-studio-${{ fromJson(steps.metadata.outputs.buildspec).dependencies.obs-studio.version }}
+          key: ${{ runner.os }}-libobs-${{ hashFiles('buildspec.json') }}-${{ runner.arch }}-${{ steps.metadata.outputs.ImageVersion }}
+
+      - name: Download dependencies without obs-studio
+        if: steps.libobs-cache.outputs.cache-hit == 'true'
+        run: cmake -DWITH_OBS_STUDIO=OFF -P scripts/download-deps.cmake
+
+      - name: Download dependencies
+        if: steps.libobs-cache.outputs.cache-hit != 'true'
+        run: cmake -P scripts/download-deps.cmake
+
+      - name: Build libobs
+        shell: pwsh
+        if: steps.libobs-cache.outputs.cache-hit != 'true'
+        run: ./scripts/build-obs-studio-windows.ps1
+
+      - name: Configure
+        run: cmake --preset windows-x64
+
+      - name: Build
+        run: cmake --build --preset windows-x64
+
+      - name: Package
+        shell: pwsh
+        env:
+          PLUGIN_NAME: ${{ fromJson(steps.metadata.outputs.buildspec).name }}
+          PLUGIN_VERSION: ${{ fromJson(steps.metadata.outputs.buildspec).version }}
+        run: |
+          $InstallDir = "release/package"
+          cmake --install build_x64 --config RelWithDebInfo --prefix $InstallDir
+
+          $SymbolsDir = "release/symbols"
+          New-Item -ItemType Directory -Path $SymbolsDir -Force | Out-Null
+
+          Get-ChildItem -Path $InstallDir -Filter "*.pdb" -Recurse | ForEach-Object {
+              $RelativePath = [System.IO.Path]::GetRelativePath($InstallDir, $_.DirectoryName)
+              $DestDir = Join-Path $SymbolsDir $RelativePath
+              New-Item -ItemType Directory -Path $DestDir -Force | Out-Null
+
+              Move-Item -Path $_.FullName -Destination $DestDir
+          }
+
+          $MainZip = "release/$env:PLUGIN_NAME-$env:PLUGIN_VERSION-windows-x64.zip"
+          Compress-Archive -Path "$InstallDir/*" -DestinationPath $MainZip -Force
+
+          $PdbZip = "release/$env:PLUGIN_NAME-$env:PLUGIN_VERSION-windows-x64-pdb.zip"
+          Compress-Archive -Path "$SymbolsDir/*" -DestinationPath $PdbZip -Force
+
+      - name: Upload Binary
+        uses: actions/upload-artifact@v6
+        with:
+          name: ${{ fromJson(steps.metadata.outputs.buildspec).name }}-binary-windows-x64-${{ github.run_number }}
+          path: release/${{ fromJson(steps.metadata.outputs.buildspec).name }}-${{ fromJson(steps.metadata.outputs.buildspec).version }}-windows-x64.zip
+
+      - name: Upload PDB
+        uses: actions/upload-artifact@v6
+        with:
+          name: ${{ fromJson(steps.metadata.outputs.buildspec).name }}-binary-windows-x64-${{ github.run_number }}-pdb
+          path: release/${{ fromJson(steps.metadata.outputs.buildspec).name }}-${{ fromJson(steps.metadata.outputs.buildspec).version }}-windows-x64-pdb.zip

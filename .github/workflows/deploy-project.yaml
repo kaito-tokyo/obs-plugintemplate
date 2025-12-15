@@ -135,10 +135,10 @@ jobs:
 
           xcrun stapler staple release/*-macos-universal.pkg
 
-      - name: Upload Installer
+      - name: Upload pkg
         uses: actions/upload-artifact@v6
         with:
-          name: ${{ fromJson(steps.metadata.outputs.buildspec).name }}-installer-macos-universal-${{ github.run_number }}
+          name: ${{ fromJson(steps.metadata.outputs.buildspec).name }}-pkg-macos-universal-${{ github.run_number }}
           path: release/${{ fromJson(steps.metadata.outputs.buildspec).name }}-*.pkg
           if-no-files-found: error
 
@@ -154,7 +154,7 @@ jobs:
       - name: Upload dSYM
         uses: actions/upload-artifact@v6
         with:
-          name: ${{ fromJson(steps.metadata.outputs.buildspec).name }}-dsym-macos-universal-${{ github.run_number }}
+          name: ${{ fromJson(steps.metadata.outputs.buildspec).name }}-pkg-macos-universal-${{ github.run_number }}-dsym
           path: build_macos/RelWithDebInfo/${{ fromJson(steps.metadata.outputs.buildspec).name }}-*.dSYM.zip
           if-no-files-found: error
 
@@ -234,12 +234,99 @@ jobs:
           path: release/*.ddeb
           if-no-files-found: error
 
+  windows-deploy:
+    name: Windows Deploy
+
+    runs-on: windows-2022
+    timeout-minutes: 30
+    environment: production-windows
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          submodules: recursive
+
+      - name: Read metadata
+        id: metadata
+        shell: bash
+        run: |
+          {
+            echo "buildspec<<EOF"
+            jq -c . buildspec.json
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+          echo "ImageVersion=$ImageVersion" >> "$GITHUB_OUTPUT"
+
+      - name: Download dependencies
+        run: cmake -P scripts/download-deps.cmake
+
+      - name: Build libobs
+        shell: pwsh
+        run: ./scripts/build-obs-studio-windows.ps1
+
+      - name: Configure
+        run: cmake --preset windows-ci-x64
+
+      - name: Build
+        run: cmake --build --preset windows-ci-x64
+
+      - name: Package
+        shell: pwsh
+        env:
+          PLUGIN_NAME: ${{ fromJson(steps.metadata.outputs.buildspec).name }}
+          PLUGIN_VERSION: ${{ fromJson(steps.metadata.outputs.buildspec).version }}
+        run: |
+          $InstallDir = "release/package"
+          cmake --install build_x64 --config RelWithDebInfo --prefix $InstallDir
+
+          $SymbolsDir = "release/symbols"
+          New-Item -ItemType Directory -Path $SymbolsDir -Force | Out-Null
+
+          Get-ChildItem -Path $InstallDir -Filter "*.pdb" -Recurse | ForEach-Object {
+              $RelativePath = [System.IO.Path]::GetRelativePath($InstallDir, $_.DirectoryName)
+              $DestDir = Join-Path $SymbolsDir $RelativePath
+              New-Item -ItemType Directory -Path $DestDir -Force | Out-Null
+
+              Move-Item -Path $_.FullName -Destination $DestDir
+          }
+
+          $MainZip = "release/$env:PLUGIN_NAME-$env:PLUGIN_VERSION-windows-x64.zip"
+          Compress-Archive -Path "$InstallDir/*" -DestinationPath $MainZip -Force
+
+          $PdbZip = "release/$env:PLUGIN_NAME-$env:PLUGIN_VERSION-windows-x64-pdb.zip"
+          Compress-Archive -Path "$SymbolsDir/*" -DestinationPath $PdbZip -Force
+
+      - name: Upload Binary
+        uses: actions/upload-artifact@v6
+        with:
+          name: ${{ fromJson(steps.metadata.outputs.buildspec).name }}-binary-windows-x64-${{ github.run_number }}
+          path: release/${{ fromJson(steps.metadata.outputs.buildspec).name }}-${{ fromJson(steps.metadata.outputs.buildspec).version }}-windows-x64.zip
+
+      - name: Upload PDB
+        uses: actions/upload-artifact@v6
+        with:
+          name: ${{ fromJson(steps.metadata.outputs.buildspec).name }}-binary-windows-x64-${{ github.run_number }}-pdb
+          path: release/${{ fromJson(steps.metadata.outputs.buildspec).name }}-${{ fromJson(steps.metadata.outputs.buildspec).version }}-windows-x64-pdb.zip
+
+      - name: Save libobs cache
+        uses: actions/cache/save@v5
+        id: libobs-cache
+        with:
+          path: |
+            .deps/bin
+            .deps/cmake
+            .deps/include
+            .deps/lib
+            .deps/obs-studio-${{ fromJson(steps.metadata.outputs.buildspec).dependencies.obs-studio.version }}
+          key: ${{ runner.os }}-libobs-${{ hashFiles('buildspec.json') }}-${{ runner.arch }}-${{ steps.metadata.outputs.ImageVersion }}
+
   create-release:
     name: Create Release
 
     runs-on: ubuntu-24.04
     if: startsWith(github.ref, 'refs/tags/')
-    needs: [macos-deploy, ubuntu-deploy]
+    needs: [macos-deploy, ubuntu-deploy, windows-deploy ]
 
     permissions:
       contents: write
@@ -256,16 +343,17 @@ jobs:
             jq -c . buildspec.json
             echo "EOF"
           } >> "$GITHUB_OUTPUT"
+          echo "ImageVersion=$ImageVersion" >> "$GITHUB_OUTPUT"
 
       - name: Download macOS Installer
         uses: actions/download-artifact@v7
         with:
-          name: ${{ fromJson(steps.metadata.outputs.buildspec).name }}-installer-macos-universal-${{ github.run_number }}
+          name: ${{ fromJson(steps.metadata.outputs.buildspec).name }}-pkg-macos-universal-${{ github.run_number }}
 
       - name: Download macOS dSYM
         uses: actions/download-artifact@v7
         with:
-          name: ${{ fromJson(steps.metadata.outputs.buildspec).name }}-dsym-macos-universal-${{ github.run_number }}
+          name: ${{ fromJson(steps.metadata.outputs.buildspec).name }}-pkg-macos-universal-${{ github.run_number }}-dsym
 
       - name: Download Ubuntu deb
         uses: actions/download-artifact@v7
@@ -276,6 +364,16 @@ jobs:
         uses: actions/download-artifact@v7
         with:
           name: ${{ fromJson(steps.metadata.outputs.buildspec).name }}-deb-ubuntu-24.04-x86_64-${{ github.run_number }}-dbgsym
+
+      - name: Download Windows Binary
+        uses: actions/download-artifact@v7
+        with:
+          name: ${{ fromJson(steps.metadata.outputs.buildspec).name }}-binary-windows-x64-${{ github.run_number }}
+
+      - name: Download Windows PDB
+        uses: actions/download-artifact@v7
+        with:
+          name: ${{ fromJson(steps.metadata.outputs.buildspec).name }}-binary-windows-x64-${{ github.run_number }}-pdb
 
       - name: Create Draft Release
         env:
@@ -294,6 +392,7 @@ jobs:
             $PLUGIN_NAME-*.dSYM.zip \
             $PLUGIN_NAME-*.deb \
             $PLUGIN_NAME-*.ddeb \
+            $PLUGIN_NAME-*.zip \
             --draft \
             --generate-notes \
             --title "$TAG_NAME" \
