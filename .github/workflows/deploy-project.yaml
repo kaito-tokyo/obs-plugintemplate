@@ -51,4 +51,3 @@ jobs:
 
       - name: Build
         run: cmake --build --preset macos
-

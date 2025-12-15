@@ -1,12 +1,12 @@
 name: Set up macOS Signing Certificates
-description: 'Imports the macOS code signing certificate into a temporary keychain'
+description: Imports the macOS code signing certificate into a temporary keychain
 
 inputs:
   MACOS_SIGNING_CERT:
-    description: 'Base64 encoded .p12 certificate'
+    description: Base64 encoded .p12 certificate
     required: true
   MACOS_SIGNING_CERT_PASSWORD:
-    description: 'Password for the .p12 certificate'
+    description: Password for the .p12 certificate
     required: true
 
 runs:
