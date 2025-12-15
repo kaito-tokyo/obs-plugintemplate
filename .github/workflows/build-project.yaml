@@ -97,9 +97,9 @@ jobs:
           sudo apt-get remove --purge -y man-db
           sudo add-apt-repository -y ppa:obsproject/obs-studio
           sudo apt-get update
-          sudo apt-get install -y --no-install-recommends \
+          sudo apt-get install -y eatmydata
+          sudo eatmydata apt-get install -y --no-install-recommends \
             cmake \
-            git \
             libgles2-mesa-dev \
             libgtest-dev \
             libqt6svg6-dev \

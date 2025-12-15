@@ -200,9 +200,9 @@ jobs:
           sudo apt-get remove --purge -y man-db
           sudo add-apt-repository -y ppa:obsproject/obs-studio
           sudo apt-get update
-          sudo apt-get install -y --no-install-recommends \
+          sudo apt-get install -y eatmydata
+          sudo eatmydata apt-get install -y --no-install-recommends \
             cmake \
-            git \
             libgles2-mesa-dev \
             libgtest-dev \
             libqt6svg6-dev \
@@ -248,25 +248,14 @@ jobs:
       contents: write
 
     steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
       - name: Download macOS Installer
         uses: actions/download-artifact@v6
         with:
-          name: ${{ github.event.repository.name }}-installer-macos-universal-${{ github.run_number }}
-
-      - name: Download macOS dSYM
-        uses: actions/download-artifact@v6
-        with:
-          name: ${{ github.event.repository.name }}-dsym-macos-universal-${{ github.run_number }}
-
-      - name: Download Ubuntu deb
-        uses: actions/download-artifact@v6
-        with:
-          name: ${{ github.event.repository.name }}-deb-ubuntu-24.04-x86_64-${{ github.run_number }}
-
-      - name: Download Ubuntu ddeb
-        uses: actions/download-artifact@v6
-        with:
-          name: ${{ github.event.repository.name }}-deb-ubuntu-24.04-x86_64-${{ github.run_number }}-dbgsym
+          name: ${{ github.event.repository.name }}-*
+          merge-multiple: true
 
       - name: Create Draft Release
         env:
