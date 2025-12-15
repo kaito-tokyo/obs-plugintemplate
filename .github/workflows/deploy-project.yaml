@@ -29,10 +29,20 @@ jobs:
       CODESIGN_OK: ${{ secrets.MACOS_SIGNING_APPLICATION_IDENTITY != '' }}
 
     steps:
+      - run: echo $ImageVersion
       - name: Checkout
         uses: actions/checkout@v6
         with:
           submodules: recursive
+
+      - name: Read buildspec.json
+        id: buildspec
+        run: |
+          {
+            echo "JSON<<EOF"
+            jq -c . buildspec.json
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
 
       - name: Set up macOS Signing Certificates
         uses: ./.github/actions/setup-macos-codesigning
@@ -72,3 +82,14 @@ jobs:
           name: ${{ github.event.repository.name }}-installer-macos-universal-${{ github.run_number }}
           path: release/*.pkg
           if-no-files-found: error
+
+      - name: Save libobs cache
+        uses: actions/cache/save@v5
+        continue-on-error: true
+        with:
+          path: |
+            .deps/Frameworks
+            .deps/include
+            .deps/lib
+            .deps/obs-studio-${{ fromJson(steps.buildspec.outputs.JSON).dependencies.obs-studio.version }}
+          key: macos-libobs-${{ fromJson(steps.buildspec.outputs.JSON).dependencies.obs-studio.hashes.macos }}-${{ runner.os }}
