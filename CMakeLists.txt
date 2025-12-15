@@ -35,9 +35,7 @@ list(PREPEND CMAKE_PREFIX_PATH
 "${CMAKE_CURRENT_SOURCE_DIR}/.deps/obs-deps-2025-07-11-universal"
 )
 
-if(MSVC)
-  # TBD
-elseif(APPLE)
+if(MSVC OR APPLE)
   list(PREPEND CMAKE_PREFIX_PATH "${CMAKE_CURRENT_SOURCE_DIR}/.deps/obs-deps-qt6-${QT6_VERSION}-universal"
   "${CMAKE_CURRENT_SOURCE_DIR}/.deps/obs-deps-${PREBUILT_VERSION}-universal")
 endif()
