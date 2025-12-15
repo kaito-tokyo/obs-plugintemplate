@@ -115,7 +115,7 @@ jobs:
             printf '  </choice>\n'
             printf '  <pkg-ref id="%s" version="%s" onConclusion="none" auth="none">component.pkg</pkg-ref>\n' "$BUNDLE_ID" "$VERSION"
             printf '</installer-gui-script>\n'
-          } > release/distribution.xml
+          } | tee release/distribution.xml
 
           productbuild \
             --distribution release/distribution.xml \
