@@ -234,7 +234,6 @@ jobs:
           path: release/*.ddeb
           if-no-files-found: error
 
-
   windows-deploy:
     name: Windows Deploy
 
@@ -344,16 +343,17 @@ jobs:
             jq -c . buildspec.json
             echo "EOF"
           } >> "$GITHUB_OUTPUT"
+          echo "ImageVersion=$ImageVersion" >> "$GITHUB_OUTPUT"
 
       - name: Download macOS Installer
         uses: actions/download-artifact@v7
         with:
-          name: ${{ fromJson(steps.metadata.outputs.buildspec).name }}-installer-macos-universal-${{ github.run_number }}
+          name: ${{ fromJson(steps.metadata.outputs.buildspec).name }}-pkg-macos-universal-${{ github.run_number }}
 
       - name: Download macOS dSYM
         uses: actions/download-artifact@v7
         with:
-          name: ${{ fromJson(steps.metadata.outputs.buildspec).name }}-installer-macos-universal-${{ github.run_number }}-dsym
+          name: ${{ fromJson(steps.metadata.outputs.buildspec).name }}-pkg-macos-universal-${{ github.run_number }}-dsym
 
       - name: Download Ubuntu deb
         uses: actions/download-artifact@v7
