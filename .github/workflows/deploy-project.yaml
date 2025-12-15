@@ -33,7 +33,9 @@ jobs:
 
       - name: Set up macOS Signing Certificates
         uses: ./.github/actions/setup-macos-signing-certs
+        if: ${{ secrets.MACOS_SIGNING_APPLICATION_IDENTITY != '' }}
         with:
+          MACOS_SIGNING_APPLICATION_IDENTITY: ${{ secrets.MACOS_SIGNING_APPLICATION_IDENTITY }}
           MACOS_SIGNING_CERT: ${{ secrets.MACOS_SIGNING_CERT }}
           MACOS_SIGNING_CERT_PASSWORD: ${{ secrets.MACOS_SIGNING_CERT_PASSWORD }}
 
