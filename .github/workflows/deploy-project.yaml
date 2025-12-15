@@ -100,7 +100,7 @@ jobs:
             --version "$VERSION" \
             release/component.pkg
 
-          cat <<EOF | awk '{ sub(/^[ \t]+/, ""); print }' > release/distribution.xml
+          cat <<EOF > release/distribution.xml
           <?xml version="1.0" encoding="utf-8"?>
           <installer-gui-script minSpecVersion="2">
             <title>$DISPLAY_NAME</title>
