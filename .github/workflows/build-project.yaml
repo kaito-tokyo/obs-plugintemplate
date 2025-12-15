@@ -131,6 +131,7 @@ jobs:
 
       - name: Read metadata
         id: metadata
+        shell: bash
         run: |
           {
             echo "buildspec<<EOF"
