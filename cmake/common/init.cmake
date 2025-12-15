@@ -36,6 +36,12 @@ if(EXISTS "${BUILDSPEC_FILE}")
   string(JSON PLUGIN_WEBSITE GET "${BUILDSPEC_CONTENT}" website)
   string(JSON PLUGIN_EMAIL GET "${BUILDSPEC_CONTENT}" email)
 
+  string(REPLACE "." ";" _version_canonical "${_version}")
+  list(GET _version_canonical 0 PLUGIN_VERSION_MAJOR)
+  list(GET _version_canonical 1 PLUGIN_VERSION_MINOR)
+  list(GET _version_canonical 2 PLUGIN_VERSION_PATCH)
+  unset(_version_canonical)
+
   string(JSON PREBUILT_VERSION GET "${BUILDSPEC_CONTENT}" dependencies prebuilt version)
   string(JSON QT6_VERSION GET "${BUILDSPEC_CONTENT}" dependencies qt6 version)
 
