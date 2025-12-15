@@ -115,3 +115,23 @@ jobs:
 
       - name: Build
         run: cmake --build --preset ubuntu-x86_64
+
+  windows-build:
+    name: Windows Build
+
+    runs-on: windows-2022
+
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          submodules: recursive
+
+      - name: Download dependencies
+        run: cmake -P scripts/download-deps.cmake
+
+      - name: Build libobs
+        shell: pwsh
+        run: ./scripts/build-obs-studio-windows.ps1
