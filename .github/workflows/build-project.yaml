@@ -40,7 +40,7 @@ jobs:
           echo "ImageVersion=$ImageVersion" >> "$GITHUB_OUTPUT"
 
       - name: Install dependencies via Homebrew
-        run: brew install cmake
+        run: brew install -q cmake
 
       - name: Restore libobs cache
         uses: actions/cache/restore@v5
