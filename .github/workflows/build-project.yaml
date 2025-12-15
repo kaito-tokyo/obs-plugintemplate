@@ -77,3 +77,51 @@ jobs:
           name: ${{ github.event.repository.name }}-bundle-macos-universal-${{ github.run_number }}
           path: build_macos/rundir/RelWithDebInfo/*.plugin
           if-no-files-found: error
+
+  ubuntu-build:
+    name: Ubuntu Build
+
+    runs-on: ubuntu-24.04
+
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          submodules: recursive
+
+      - name: Install system dependencies on Ubuntu
+        run: |
+          echo "man-db man-db/auto-update boolean false" | sudo debconf-set-selections
+          sudo apt-get remove --purge -y man-db
+          sudo add-apt-repository -y ppa:obsproject/obs-studio
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            cmake \
+            git \
+            libgles2-mesa-dev \
+            libgtest-dev \
+            libqt6svg6-dev \
+            libsimde-dev \
+            ninja-build \
+            obs-studio \
+            pkg-config \
+            qt6-base-dev \
+            qt6-base-private-dev
+
+      - name: Read metadata
+        id: metadata
+        run: |
+          {
+            echo "buildspec<<EOF"
+            jq -c . buildspec.json
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+          echo "ImageVersion=$ImageVersion" >> "$GITHUB_OUTPUT"
+
+      - name: Configure
+        run: cmake --preset ubuntu-x86_64
+
+      - name: Build
+        run: cmake --build --preset ubuntu-x86_64
