@@ -157,7 +157,7 @@ jobs:
         uses: actions/upload-artifact@v6
         with:
           name: ${{ github.event.repository.name }}-dsym-macos-universal-${{ github.run_number }}
-          path: build_macos/RelWithDebInfo/$NAME.dSYM.zip
+          path: build_macos/RelWithDebInfo/*.dSYM.zip
           if-no-files-found: error
 
       - name: Save libobs cache
@@ -168,7 +168,7 @@ jobs:
             .deps/Frameworks
             .deps/include
             .deps/lib
-            .deps/obs-studio-${{ fromJson(steps.metadata.outputs.JSON).dependencies.obs-studio.version }}
+            .deps/obs-studio-${{ fromJson(steps.metadata.outputs.buildspec).dependencies.obs-studio.version }}
           key: macos-libobs-${{ hashFiles('buildspec.json') }}-${{ runner.arch }}-${{ steps.metadata.outputs.ImageVersion }}
 
   create-release:
