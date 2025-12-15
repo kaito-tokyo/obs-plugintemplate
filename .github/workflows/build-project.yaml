@@ -6,7 +6,6 @@ on:
   pull_request:
     branches: [main, master, develop]
 
-
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -47,3 +46,9 @@ jobs:
       - name: Build
         run: cmake --build --preset macos
 
+      - name: Upload Build Artifacts
+        uses: actions/upload-artifact@v6
+        with:
+          name: ${{ github.event.repository.name }}-${{ github.event_name }}-macos-universal-${{ github.run_number }}
+          path: build_macos/rundir/RelWithDebInfo/*.plugin
+          if-no-files-found: error
