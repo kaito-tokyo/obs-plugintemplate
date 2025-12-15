@@ -70,10 +70,10 @@ jobs:
         env:
           CODESIGN_IDENT: ${{ steps.codesign.outputs.CODESIGN_IDENT }}
           CODESIGN_TEAM: ${{ steps.codesign.outputs.CODESIGN_TEAM }}
-        run: cmake --preset macos
+        run: cmake --preset macos-ci
 
       - name: Build
-        run: cmake --build --preset macos
+        run: cmake --build --preset macos-ci
 
       - name: Archive dSYM
         run: |
@@ -122,8 +122,6 @@ jobs:
             --sign "$MACOS_SIGNING_INSTALLER_IDENTITY" \
             "release/$PKG_NAME"
 
-          rm release/$PKG_NAME
-
       - name: Notarize Installer
         if: env.CODESIGN_OK == 'true' && startsWith(github.ref, 'refs/tags/')
         env:
@@ -137,7 +135,7 @@ jobs:
             --team-id "$TEAM_ID" \
             --wait
 
-          xcrun stapler staple "$PKG_PATH"
+          xcrun stapler staple release/*-macos-universal.pkg
 
       - name: Upload Installer
         uses: actions/upload-artifact@v6
