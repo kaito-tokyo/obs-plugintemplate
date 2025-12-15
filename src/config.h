@@ -1,6 +1,6 @@
 /*
- * Live Stream Segmenter
- * Copyright (C) 2025 Kaito Udagawa umireon@kaito.tokyo
+ * Plugin Name
+ * Copyright (C) <Year> <Developer> <Email Address>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,20 +12,10 @@
  * "LICENSE" in the distribution root.
  */
 
-#include "config.h"
+ #pragma once
 
-#include <obs-module.h>
+ #define PLUGIN_NAME "plugintemplate-for-obs"
 
-OBS_DECLARE_MODULE()
-OBS_MODULE_USE_DEFAULT_LOCALE(PLUGIN_NAME, "en-US")
-
-bool obs_module_load(void)
-{
-	blog(LOG_INFO, "[" PLUGIN_NAME "] plugin loaded successfully (version %s)", PLUGIN_VERSION);
-	return true;
-}
-
-void obs_module_unload(void)
-{
-	blog(LOG_INFO, "[" PLUGIN_NAME "] plugin unloaded");
-}
+ #ifndef PLUGIN_VERSION
+ #define PLUGIN_VERSION "0.0.0"
+ #endif
