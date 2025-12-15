@@ -178,7 +178,7 @@ jobs:
           PLUGIN_VERSION: ${{ fromJson(steps.metadata.outputs.buildspec).version }}
         run: |
           $InstallDir = "release/package"
-          cmake --install build_x64 --prefix $InstallDir
+          cmake --install build_x64 --config RelWithDebInfo --prefix $InstallDir
 
           $SymbolsDir = "release/symbols"
           New-Item -ItemType Directory -Path $SymbolsDir -Force | Out-Null
