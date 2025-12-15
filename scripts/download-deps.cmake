@@ -50,7 +50,7 @@ file(READ "${BUILDSPEC_FILE}" BUILDSPEC_CONTENT)
 
 file(MAKE_DIRECTORY "${DEPS_DIR}")
 
-if(MSVC)
+if(WIN32)
   # 1. OBS Studio
   if(WITH_OBS_STUDIO)
     get_dependency_info("${BUILDSPEC_CONTENT}" obs-studio windows-x64 OFF)
