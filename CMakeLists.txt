@@ -1,9 +1,9 @@
 cmake_minimum_required(VERSION 3.28)
 
-project(plugintemplate-for-obs VERSION 1.0.0 LANGUAGES C CXX)
-
 list(PREPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/common")
 include(init)
+
+project(${PLUGIN_NAME} VERSION ${PLUGIN_VERSION} LANGUAGES C CXX)
 
 if(MSVC)
   list(PREPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/windows")
