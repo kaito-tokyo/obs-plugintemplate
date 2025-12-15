@@ -81,7 +81,7 @@ jobs:
           cmake --install build_macos --config RelWithDebInfo --prefix release
 
       - name: Notarize Installer
-        if: env.CODESIGN_OK == 'true' && startsWith(github.ref, 'refs/tags/')
+        if: env.CODESIGN_OK == 'true'
         env:
           APPLE_ID: ${{ secrets.MACOS_NOTARIZATION_USERNAME }}
           APPLE_PASSWORD: ${{ secrets.MACOS_NOTARIZATION_PASSWORD }}
