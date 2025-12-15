@@ -3,13 +3,12 @@
         {
             "name": "Mac",
             "includePath": ["${workspaceFolder}/**"],
-            "defines": ["PLUGIN_NAME=\"[plugin]\"", "PLUGIN_VERSION=\"0.0.0\""],
             "compilerPath": "/usr/bin/clang",
             "cStandard": "c17",
             "cppStandard": "c++17",
             "intelliSenseMode": "macos-clang-arm64",
             "macFrameworkPath": [
-                "${workspaceFolder}/.deps/obs-deps-qt6-2025-07-11-universal/lib"
+                "${workspaceFolder}/.deps/obs-deps-qt6-*-universal/lib"
             ]
         }
     ],
