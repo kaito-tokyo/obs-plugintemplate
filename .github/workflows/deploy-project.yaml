@@ -101,21 +101,21 @@ jobs:
             --version "$VERSION" \
             release/component.pkg
 
-          cat <<EOF > release/distribution.xml
-          <?xml version="1.0" encoding="utf-8"?>
-          <installer-gui-script minSpecVersion="2">
-            <title>$DISPLAY_NAME</title>
-            <options customize="never" require-scripts="false" hostArchitectures="x86_64,arm64"/>
-            <domains enable_localSystem="false" enable_currentUserHome="true" enable_anywhere="false"/>
-            <choices-outline>
-                <line choice="default"/>
-            </choices-outline>
-            <choice id="default" title="$DISPLAY_NAME" visible="false">
-              <pkg-ref id="$BUNDLE_ID"/>
-            </choice>
-            <pkg-ref id="$BUNDLE_ID" version="$VERSION" onConclusion="none" auth="none">component.pkg</pkg-ref>
-          </installer-gui-script>
-          EOF
+          {
+            printf '<?xml version="1.0" encoding="utf-8"?>\n'
+            printf '<installer-gui-script minSpecVersion="2">\n'
+            printf '  <title>%s</title>\n' "$DISPLAY_NAME"
+            printf '  <options customize="never" require-scripts="false" hostArchitectures="x86_64,arm64"/>\n'
+            printf '  <domains enable_localSystem="false" enable_currentUserHome="true" enable_anywhere="false"/>\n'
+            printf '  <choices-outline>\n'
+            printf '      <line choice="default"/>\n'
+            printf '  </choices-outline>\n'
+            printf '  <choice id="default" title="%s" visible="false">\n' "$DISPLAY_NAME"
+            printf '    <pkg-ref id="%s"/>\n' "$BUNDLE_ID"
+            printf '  </choice>\n'
+            printf '  <pkg-ref id="%s" version="%s" onConclusion="none" auth="none">component.pkg</pkg-ref>\n' "$BUNDLE_ID" "$VERSION"
+            printf '</installer-gui-script>\n'
+          } > release/distribution.xml
 
           productbuild \
             --distribution release/distribution.xml \
