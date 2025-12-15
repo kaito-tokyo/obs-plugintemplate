@@ -144,7 +144,8 @@ jobs:
         id: libobs-cache
         with:
           path: |
-            .deps/Frameworks
+            .deps/bin
+            .deps/cmake
             .deps/include
             .deps/lib
             .deps/obs-studio-${{ fromJson(steps.metadata.outputs.buildspec).dependencies.obs-studio.version }}
