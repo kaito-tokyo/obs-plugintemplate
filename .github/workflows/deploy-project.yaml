@@ -87,10 +87,7 @@ jobs:
           APPLE_PASSWORD: ${{ secrets.MACOS_NOTARIZATION_PASSWORD }}
           TEAM_ID: ${{ steps.codesign.outputs.CODESIGN_TEAM }}
         run: |
-          PKG_PATH=$(find release -name "release/*.pkg" | head -n 1)
-          echo "Found package for notarization: $PKG_PATH"
-
-          xcrun notarytool submit "$PKG_PATH" \
+          xcrun notarytool submit release/*.pkg \
             --apple-id "$APPLE_ID" \
             --password "$APPLE_PASSWORD" \
             --team-id "$TEAM_ID" \
