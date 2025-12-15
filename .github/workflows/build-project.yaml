@@ -47,6 +47,6 @@ jobs:
       - name: Upload Build Artifacts
         uses: actions/upload-artifact@v6
         with:
-          name: ${{ github.event.repository.name }}-${{ github.event_name }}-macos-universal-${{ github.run_number }}
+          name: ${{ github.event.repository.name }}-bundle-macos-universal-${{ github.run_number }}
           path: build_macos/rundir/RelWithDebInfo/*.plugin
           if-no-files-found: error

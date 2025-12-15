@@ -60,3 +60,15 @@ jobs:
 
       - name: Build
         run: cmake --build --preset macos
+
+      - name: Package
+        run: |
+          mkdir -p release
+          cmake --install build_macos --prefix release
+
+      - name: Upload Installer
+        uses: actions/upload-artifact@v6
+        with:
+          name: ${{ github.event.repository.name }}-installer-macos-universal-${{ github.run_number }}
+          path: release/*.pkg
+          if-no-files-found: error
