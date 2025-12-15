@@ -254,8 +254,22 @@ jobs:
       - name: Download macOS Installer
         uses: actions/download-artifact@v6
         with:
-          name: ${{ github.event.repository.name }}-*
-          merge-multiple: true
+          name: ${{ github.event.repository.name }}-installer-macos-universal-${{ github.run_number }}
+
+      - name: Download macOS dSYM
+        uses: actions/download-artifact@v6
+        with:
+          name: ${{ github.event.repository.name }}-dsym-macos-universal-${{ github.run_number }}
+
+      - name: Download Ubuntu deb
+        uses: actions/download-artifact@v6
+        with:
+          name: ${{ github.event.repository.name }}-deb-ubuntu-24.04-x86_64-${{ github.run_number }}
+
+      - name: Download Ubuntu ddeb
+        uses: actions/download-artifact@v6
+        with:
+          name: ${{ github.event.repository.name }}-deb-ubuntu-24.04-x86_64-${{ github.run_number }}-dbgsym
 
       - name: Create Draft Release
         env:
