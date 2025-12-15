@@ -12,9 +12,10 @@
  * "LICENSE" in the distribution root.
  */
 
-#include "config.h"
 
 #include <obs-module.h>
+
+#include "plugin-support.h"
 
 OBS_DECLARE_MODULE()
 OBS_MODULE_USE_DEFAULT_LOCALE(PLUGIN_NAME, "en-US")
