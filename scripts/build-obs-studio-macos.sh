@@ -1,14 +1,19 @@
 #!/bin/bash
 set -euo pipefail
 
+# ------------------------------------------------------------------------------
+# 1. Setup Phase
+# ------------------------------------------------------------------------------
+echo "::group::Initialize and Check Dependencies"
+
 CMAKE_OSX_ARCHITECTURES="arm64;x86_64"
 CMAKE_OSX_DEPLOYMENT_TARGET="12.0"
 
-ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
+ROOT_DIR="$(cd "$(dirname "$0")"/.. && pwd)"
 DEPS_DIR="${ROOT_DIR}/.deps"
 
 if [[ ! -f "${DEPS_DIR}/.deps_versions" ]]; then
-    echo "Dependencies not found. Please run setup-deps.sh first."
+    echo "Dependencies not found. Please run \`cmake -P scripts/download-deps.cmake\` first."
     exit 1
 fi
 
@@ -25,7 +30,15 @@ if [[ ! -d $SOURCE_DIR ]]; then
     exit 1
 fi
 
+echo "Cleaning build directory..."
 rm -rf "$BUILD_DIR"
+
+echo "::endgroup::"
+
+# ------------------------------------------------------------------------------
+# 2. Configure Phase
+# ------------------------------------------------------------------------------
+echo "::group::Configure OBS Studio (Universal)"
 
 cmake -S "$SOURCE_DIR" \
       -B "$BUILD_DIR" \
@@ -39,20 +52,48 @@ cmake -S "$SOURCE_DIR" \
       "-DCMAKE_PREFIX_PATH=${PREBUILT_DIR};${QT6_DIR}" \
       "-DCMAKE_INSTALL_PREFIX=$DEPS_DIR"
 
+echo "::endgroup::"
+
+# ------------------------------------------------------------------------------
+# 3. Build Phase (Debug)
+# ------------------------------------------------------------------------------
+echo "::group::Build OBS Frontend API (Debug)"
+
 cmake --build "$BUILD_DIR" \
       --target obs-frontend-api \
       --config Debug \
       --parallel
+
+echo "::endgroup::"
+
+# ------------------------------------------------------------------------------
+# 4. Build Phase (Release)
+# ------------------------------------------------------------------------------
+echo "::group::Build OBS Frontend API (Release)"
 
 cmake --build "$BUILD_DIR" \
       --target obs-frontend-api \
       --config Release \
       --parallel
 
+echo "::endgroup::"
+
+# ------------------------------------------------------------------------------
+# 5. Install Phase (Debug)
+# ------------------------------------------------------------------------------
+echo "::group::Install Development Artifacts (Debug)"
+
 cmake --install "$BUILD_DIR" \
       --component Development \
       --config Debug \
       --prefix "$DEPS_DIR"
+
+echo "::endgroup::"
+
+# ------------------------------------------------------------------------------
+# 6. Install Phase (Release)
+# ------------------------------------------------------------------------------
+echo "::group::Install Development Artifacts (Release)"
 
 cmake --install "$BUILD_DIR" \
       --component Development \
@@ -60,3 +101,4 @@ cmake --install "$BUILD_DIR" \
       --prefix "$DEPS_DIR"
 
 echo "Install done. Artifacts are in $DEPS_DIR"
+echo "::endgroup::"
