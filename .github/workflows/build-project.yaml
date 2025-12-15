@@ -110,16 +110,6 @@ jobs:
             qt6-base-dev \
             qt6-base-private-dev
 
-      - name: Read metadata
-        id: metadata
-        run: |
-          {
-            echo "buildspec<<EOF"
-            jq -c . buildspec.json
-            echo "EOF"
-          } >> "$GITHUB_OUTPUT"
-          echo "ImageVersion=$ImageVersion" >> "$GITHUB_OUTPUT"
-
       - name: Configure
         run: cmake --preset ubuntu-x86_64
 
