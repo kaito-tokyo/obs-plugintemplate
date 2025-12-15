@@ -87,8 +87,8 @@ jobs:
           MACOS_SIGNING_INSTALLER_IDENTITY: ${{ secrets.MACOS_SIGNING_INSTALLER_IDENTITY }}
           BUNDLE_ID: ${{ fromJson(steps.metadata.outputs.buildspec).platformConfig.macos.bundleId }}
           DISPLAY_NAME: ${{ fromJson(steps.metadata.outputs.buildspec).displayName }}
+          PKG_NAME: ${{ fromJson(steps.metadata.outputs.buildspec).name }}-${{ fromJson(steps.metadata.outputs.buildspec).version }}-macos-universal.pkg
           VERSION: ${{ fromJson(steps.metadata.outputs.buildspec).version }}
-          PKG_NAME: ${{ fromJson(steps.metadata.outputs.buildspec).name }}-${{ env.VERSION }}-macos-universal.pkg
         run: |
           cmake --install build_macos --config RelWithDebInfo --prefix "release/payload/Library/Application Support/obs-studio/plugins" --strip
 
@@ -142,7 +142,7 @@ jobs:
       - name: Upload Installer
         uses: actions/upload-artifact@v6
         with:
-          name: ${{ github.event.repository.name }}-installer-macos-universal-${{ github.run_number }}
+          name: ${{ fromJson(steps.metadata.outputs.buildspec).name }}-installer-macos-universal-${{ github.run_number }}
           path: release/${{ fromJson(steps.metadata.outputs.buildspec).name }}-*.pkg
           if-no-files-found: error
 
@@ -157,7 +157,7 @@ jobs:
       - name: Upload dSYM
         uses: actions/upload-artifact@v6
         with:
-          name: ${{ github.event.repository.name }}-dsym-macos-universal-${{ github.run_number }}
+          name: ${{ fromJson(steps.metadata.outputs.buildspec).name }}-dsym-macos-universal-${{ github.run_number }}
           path: build_macos/RelWithDebInfo/*.dSYM.zip
           if-no-files-found: error
 
@@ -226,14 +226,14 @@ jobs:
       - name: Upload deb
         uses: actions/upload-artifact@v6
         with:
-          name: ${{ github.event.repository.name }}-deb-ubuntu-24.04-x86_64-${{ github.run_number }}
+          name: ${{ fromJson(steps.metadata.outputs.buildspec).name }}-deb-ubuntu-24.04-x86_64-${{ github.run_number }}
           path: release/*.deb
           if-no-files-found: error
 
       - name: Upload ddeb
         uses: actions/upload-artifact@v6
         with:
-          name: ${{ github.event.repository.name }}-deb-ubuntu-24.04-x86_64-${{ github.run_number }}-dbgsym
+          name: ${{ fromJson(steps.metadata.outputs.buildspec).name }}-deb-ubuntu-24.04-x86_64-${{ github.run_number }}-dbgsym
           path: release/*.ddeb
           if-no-files-found: error
 
@@ -251,29 +251,39 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
+      - name: Read metadata
+        id: metadata
+        run: |
+          {
+            echo "buildspec<<EOF"
+            jq -c . buildspec.json
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
       - name: Download macOS Installer
         uses: actions/download-artifact@v7
         with:
-          name: ${{ github.event.repository.name }}-installer-macos-universal-${{ github.run_number }}
+          name: ${{ fromJson(steps.metadata.outputs.buildspec).name }}-installer-macos-universal-${{ github.run_number }}
 
       - name: Download macOS dSYM
         uses: actions/download-artifact@v7
         with:
-          name: ${{ github.event.repository.name }}-dsym-macos-universal-${{ github.run_number }}
+          name: ${{ fromJson(steps.metadata.outputs.buildspec).name }}-dsym-macos-universal-${{ github.run_number }}
 
       - name: Download Ubuntu deb
         uses: actions/download-artifact@v7
         with:
-          name: ${{ github.event.repository.name }}-deb-ubuntu-24.04-x86_64-${{ github.run_number }}
+          name: ${{ fromJson(steps.metadata.outputs.buildspec).name }}-deb-ubuntu-24.04-x86_64-${{ github.run_number }}
 
       - name: Download Ubuntu ddeb
         uses: actions/download-artifact@v7
         with:
-          name: ${{ github.event.repository.name }}-deb-ubuntu-24.04-x86_64-${{ github.run_number }}-dbgsym
+          name: ${{ fromJson(steps.metadata.outputs.buildspec).name }}-deb-ubuntu-24.04-x86_64-${{ github.run_number }}-dbgsym
 
       - name: Create Draft Release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PLUGIN_NAME: ${{ fromJson(steps.metadata.outputs.buildspec).name }}
         run: |
           TAG_NAME=${GITHUB_REF#refs/tags/}
 
@@ -283,10 +293,10 @@ jobs:
           fi
 
           gh release create "$TAG_NAME" \
-            release/*.pkg \
-            release/*.dSYM.zip \
-            release/*.deb \
-            release/*.ddeb \
+            $PLUGIN_NAME-*.pkg \
+            $PLUGIN_NAME-*.dSYM.zip \
+            $PLUGIN_NAME-*.deb \
+            $PLUGIN_NAME-*.ddeb \
             --draft \
             --generate-notes \
             --title "$TAG_NAME" \
