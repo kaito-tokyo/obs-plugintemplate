@@ -77,10 +77,6 @@ jobs:
       - name: Build
         run: cmake --build --preset macos-ci
 
-      - name: Archive dSYM
-        run: |
-          mkdir -p release
-
       - name: Package
         env:
           MACOS_SIGNING_APPLICATION_IDENTITY: ${{ secrets.MACOS_SIGNING_APPLICATION_IDENTITY }}
@@ -148,17 +144,18 @@ jobs:
 
       - name: Zip dSYM
         env:
-          NAME: ${{ fromJson(steps.metadata.outputs.buildspec).name }}
+          PLUGIN_NAME: ${{ fromJson(steps.metadata.outputs.buildspec).name }}
+          FILE_NAME: ${{ fromJson(steps.metadata.outputs.buildspec).name }}-${{ fromJson(steps.metadata.outputs.buildspec).version }}-macos-universal-${{ github.run_number }}.dSYM.zip
         run: |
           cd build_macos/RelWithDebInfo
-          zip -r "$NAME.dSYM.zip" "$NAME.plugin.dSYM"
+          zip -r "$FILE_NAME" "$PLUGIN_NAME.plugin.dSYM"
           echo "dSYM zipped successfully."
 
       - name: Upload dSYM
         uses: actions/upload-artifact@v6
         with:
           name: ${{ fromJson(steps.metadata.outputs.buildspec).name }}-dsym-macos-universal-${{ github.run_number }}
-          path: build_macos/RelWithDebInfo/*.dSYM.zip
+          path: build_macos/RelWithDebInfo/${{ fromJson(steps.metadata.outputs.buildspec).name }}-*.dSYM.zip
           if-no-files-found: error
 
       - name: Save libobs cache
