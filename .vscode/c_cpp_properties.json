@@ -2,13 +2,8 @@
     "configurations": [
         {
             "name": "Mac",
-            "includePath": [
-                "${workspaceFolder}/**"
-            ],
-            "defines": [
-                "PLUGIN_NAME=\"[plugin]\"",
-                "PLUGIN_VERSION=\"0.0.0\""
-            ],
+            "includePath": ["${workspaceFolder}/**"],
+            "defines": ["PLUGIN_NAME=\"[plugin]\"", "PLUGIN_VERSION=\"0.0.0\""],
             "compilerPath": "/usr/bin/clang",
             "cStandard": "c17",
             "cppStandard": "c++17",

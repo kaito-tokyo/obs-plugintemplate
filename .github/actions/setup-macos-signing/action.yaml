@@ -13,10 +13,10 @@ inputs:
 
 outputs:
   CODESIGN_IDENT:
-    description: 'The full signing identity'
+    description: The full signing identity
     value: ${{ steps.extract.outputs.CODESIGN_IDENT }}
   CODESIGN_TEAM:
-    description: 'The Team ID'
+    description: The Team ID
     value: ${{ steps.extract.outputs.CODESIGN_TEAM }}
 
 runs:
