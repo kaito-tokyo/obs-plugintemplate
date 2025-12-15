@@ -26,6 +26,10 @@ jobs:
     environment: production-macos
 
     env:
+      HOMEBREW_NO_ANALYTICS: 1
+      HOMEBREW_NO_AUTO_UPDATE: 1
+      HOMEBREW_NO_ENV_HINTS: 1
+      HOMEBREW_NO_INSTALL_CLEANUP: 1
       CODESIGN_OK: ${{ secrets.MACOS_SIGNING_APPLICATION_IDENTITY != '' }}
 
     steps:
@@ -55,7 +59,7 @@ jobs:
           MACOS_SIGNING_CERT_PASSWORD: ${{ secrets.MACOS_SIGNING_CERT_PASSWORD }}
 
       - name: Install dependencies via Homebrew
-        run: brew install cmake
+        run: brew install -q cmake
 
       - name: Download dependencies
         run: cmake -P scripts/download-deps.cmake
