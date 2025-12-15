@@ -35,14 +35,15 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Read buildspec.json
-        id: buildspec
+      - name: Read metadata
+        id: metadata
         run: |
           {
             echo "JSON<<EOF"
             jq -c . buildspec.json
             echo "EOF"
           } >> "$GITHUB_OUTPUT"
+          echo "ImageVersion=$ImageVersion" >> "$GITHUB_OUTPUT"
 
       - name: Set up macOS Signing Certificates
         uses: ./.github/actions/setup-macos-codesigning
@@ -91,5 +92,5 @@ jobs:
             .deps/Frameworks
             .deps/include
             .deps/lib
-            .deps/obs-studio-${{ fromJson(steps.buildspec.outputs.JSON).dependencies.obs-studio.version }}
-          key: macos-libobs-${{ fromJson(steps.buildspec.outputs.JSON).dependencies.obs-studio.hashes.macos }}-${{ runner.os }}
+            .deps/obs-studio-${{ fromJson(steps.metadata.outputs.JSON).dependencies.obs-studio.version }}
+          key: macos-libobs-${{ hashFiles('buildspec.json') }}-${{ runner.arch }}-${{ steps.metadata.outputs.ImageVersion }}
