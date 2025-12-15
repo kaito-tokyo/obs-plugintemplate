@@ -81,6 +81,7 @@
             "displayName": "Ubuntu x86_64 (Production)",
             "description": "Build x86_64 binary for Ubuntu (Production)",
             "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "RelWithDebInfo",
                 "BUILD_TESTING": false
             }
         }
