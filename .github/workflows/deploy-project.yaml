@@ -26,6 +26,12 @@ jobs:
     environment: production-macos
 
     steps:
+      - name: Set up macOS Signing Certificates
+        uses: ./.github/actions/setup-macos-signing-certs
+        with:
+          MACOS_SIGNING_CERT: ${{ secrets.MACOS_SIGNING_CERT }}
+          MACOS_SIGNING_CERT_PASSWORD: ${{ secrets.MACOS_SIGNING_CERT_PASSWORD }}
+
       - name: Checkout
         uses: actions/checkout@v6
         with:
