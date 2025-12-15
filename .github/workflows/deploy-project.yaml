@@ -25,6 +25,9 @@ jobs:
 
     environment: production-macos
 
+    env:
+      CODESIGN_OK: ${{ secrets.MACOS_SIGNING_APPLICATION_IDENTITY != '' }}
+
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -33,7 +36,7 @@ jobs:
 
       - name: Set up macOS Signing Certificates
         uses: ./.github/actions/setup-macos-signing-certs
-        if: ${{ secrets.MACOS_SIGNING_APPLICATION_IDENTITY != '' }}
+        if: ${{ env.CODESIGN_OK == 'true' }}
         with:
           MACOS_SIGNING_APPLICATION_IDENTITY: ${{ secrets.MACOS_SIGNING_APPLICATION_IDENTITY }}
           MACOS_SIGNING_CERT: ${{ secrets.MACOS_SIGNING_CERT }}
