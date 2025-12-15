@@ -64,7 +64,7 @@ jobs:
       - name: Package
         run: |
           mkdir -p release
-          cmake --install build_macos --prefix release --config RelWithDebInfo
+          cmake --install build_macos --config RelWithDebInfo --prefix release
 
       - name: Upload Installer
         uses: actions/upload-artifact@v6
