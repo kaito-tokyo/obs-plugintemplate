@@ -145,7 +145,7 @@ jobs:
       - name: Zip dSYM
         env:
           PLUGIN_NAME: ${{ fromJson(steps.metadata.outputs.buildspec).name }}
-          FILE_NAME: ${{ fromJson(steps.metadata.outputs.buildspec).name }}-${{ fromJson(steps.metadata.outputs.buildspec).version }}-macos-universal-${{ github.run_number }}.dSYM.zip
+          FILE_NAME: ${{ fromJson(steps.metadata.outputs.buildspec).name }}-${{ fromJson(steps.metadata.outputs.buildspec).version }}-macos-universal.dSYM.zip
         run: |
           cd build_macos/RelWithDebInfo
           zip -r "$FILE_NAME" "$PLUGIN_NAME.plugin.dSYM"
