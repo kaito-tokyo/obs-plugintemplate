@@ -35,8 +35,8 @@ jobs:
           submodules: recursive
 
       - name: Set up macOS Signing Certificates
-        uses: ./.github/actions/setup-macos-signing-certs
-        id: codesign-setup
+        uses: ./.github/actions/setup-macos-codesigning
+        id: codesign
         if: ${{ env.CODESIGN_OK == 'true' }}
         with:
           MACOS_SIGNING_APPLICATION_IDENTITY: ${{ secrets.MACOS_SIGNING_APPLICATION_IDENTITY }}
@@ -54,8 +54,8 @@ jobs:
 
       - name: Configure
         env:
-            CODESIGN_IDENT: ${{ steps.codesign-setup.outputs.CODESIGN_IDENT }}
-            CODESIGN_TEAM: ${{ steps.codesign-setup.outputs.CODESIGN_TEAM }}
+            CODESIGN_IDENT: ${{ steps.codesign.outputs.CODESIGN_IDENT }}
+            CODESIGN_TEAM: ${{ steps.codesign.outputs.CODESIGN_TEAM }}
         run: cmake --preset macos
 
       - name: Build
