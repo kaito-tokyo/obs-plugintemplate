@@ -19,6 +19,7 @@ permissions:
 jobs:
   macos-deploy:
     name: macOS Deploy
+
     runs-on: macos-15
     timeout-minutes: 30
     environment: production-macos
@@ -175,14 +176,23 @@ jobs:
     name: Ubuntu Deploy
 
     runs-on: ubuntu-24.04
-
     timeout-minutes: 30
+    environment: production-ubuntu
 
     steps:
       - name: Checkout
         uses: actions/checkout@v6
         with:
           submodules: recursive
+
+      - name: Read metadata
+        id: metadata
+        run: |
+          {
+            echo "buildspec<<EOF"
+            jq -c . buildspec.json
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
 
       - name: Install system dependencies on Ubuntu
         run: |
@@ -209,6 +219,17 @@ jobs:
       - name: Build
         run: cmake --build --preset ubuntu-x86_64
 
+      - name: Package
+        working-directory: ${{ github.workspace }}/build_x86_64
+        run: cpack -G DEB
+
+      - name: Upload deb
+        uses: actions/upload-artifact@v6
+        with:
+          name: ${{ github.event.repository.name }}-deb-ubuntu-24.04-x86_64-${{ github.run_number }}
+          path: release/*.deb
+          if-no-files-found: error
+
   create-release:
     name: Create Release
 
@@ -220,15 +241,20 @@ jobs:
       contents: write
 
     steps:
-      - name: Download macOS Installer Artifact
+      - name: Download macOS Installer
         uses: actions/download-artifact@v6
         with:
           name: ${{ github.event.repository.name }}-installer-macos-universal-${{ github.run_number }}
 
-      - name: Download macOS dSYM Artifact
+      - name: Download macOS dSYM
         uses: actions/download-artifact@v6
         with:
           name: ${{ github.event.repository.name }}-dsym-macos-universal-${{ github.run_number }}
+
+      - name: Download Ubuntu deb
+        uses: actions/download-artifact@v6
+        with:
+          name: ${{ github.event.repository.name }}-linux-deb-${{ github.run_number }}
 
       - name: Create Draft Release
         env:
