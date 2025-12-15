@@ -277,6 +277,8 @@ jobs:
           gh release create "$TAG_NAME" \
             *.pkg \
             *.dSYM.zip \
+            *.deb \
+            *.ddeb \
             --draft \
             --generate-notes \
             --title "$TAG_NAME" \
