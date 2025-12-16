@@ -12,10 +12,10 @@
  * "LICENSE" in the distribution root.
  */
 
- #pragma once
+#pragma once
 
- #define PLUGIN_NAME "plugintemplate-for-obs"
+#define PLUGIN_NAME "plugintemplate-for-obs"
 
- #ifndef PLUGIN_VERSION
- #define PLUGIN_VERSION "0.0.0"
- #endif
+#ifndef PLUGIN_VERSION
+#define PLUGIN_VERSION "0.0.0"
+#endif

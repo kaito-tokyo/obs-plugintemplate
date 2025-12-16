@@ -1,0 +1,9 @@
+#!/bin/bash
+IFS=$'\n'
+include_files=(
+  $(find src -name "*.cpp" -o -name "*.h" -o -name "*.c" -o -name "*.hpp")
+)
+unset IFS
+if [[ ${#include_files[@]} -gt 0 ]]; then
+  clang-format-19 "$@" "${include_files[@]}"
+fi

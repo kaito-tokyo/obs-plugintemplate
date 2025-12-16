@@ -1,4 +1,4 @@
-name: Lint CMake
+name: Lint Src
 
 on:
   pull_request:
@@ -17,7 +17,7 @@ defaults:
 
 jobs:
   gersemi:
-    name: Gersemi Lint
+    name: Clang Format Lint
 
     runs-on: ubuntu-24.04
     timeout-minutes: 10
@@ -41,8 +41,8 @@ jobs:
 
       - name: Set up gersemi
         run: |
-          brew install -q obsproject/tools/gersemi
+          brew install -q obsproject/tools/clang-format-19
 
-      - name: Run Gersemi Lint
+      - name: Run Clang Format Lint
         run: |
-          ./build-aux/run-gersemi --check
+          ./build-aux/run-clang-format --dry-run -Werror
