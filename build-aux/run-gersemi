@@ -6,6 +6,11 @@ include_files=(
   $(find src -name "CMakeLists.txt")
 )
 unset IFS
+
+if [[ $# -eq 0 ]]; then
+  set -- -i
+fi
+
 if [[ ${#include_files[@]} -gt 0 ]]; then
   gersemi "$@" "${include_files[@]}"
 fi
