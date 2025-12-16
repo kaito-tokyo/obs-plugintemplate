@@ -105,7 +105,6 @@ jobs:
           sudo eatmydata apt-get install -y --no-install-recommends \
             cmake \
             libgles2-mesa-dev \
-            libgtest-dev \
             libqt6svg6-dev \
             libsimde-dev \
             ninja-build \
