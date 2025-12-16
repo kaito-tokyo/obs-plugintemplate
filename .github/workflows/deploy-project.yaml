@@ -390,10 +390,9 @@ jobs:
           fi
 
           gh release create "$TAG_NAME" \
-            $PLUGIN_NAME-*.pkg \
-            $PLUGIN_NAME-*.dSYM.zip \
-            $PLUGIN_NAME-*.deb \
             $PLUGIN_NAME-*.ddeb \
+            $PLUGIN_NAME-*.deb \
+            $PLUGIN_NAME-*.pkg \
             $PLUGIN_NAME-*.zip \
             --draft \
             --generate-notes \
