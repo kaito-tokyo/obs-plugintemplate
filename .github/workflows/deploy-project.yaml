@@ -382,6 +382,8 @@ jobs:
         run: |
           TAG_NAME=${GITHUB_REF#refs/tags/}
 
+          gh release delete "$TAG_NAME" --yes || true
+
           PRERELEASE_FLAG=""
           if [[ "$TAG_NAME" == *"-"* ]]; then
             PRERELEASE_FLAG="--prerelease"
