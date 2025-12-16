@@ -63,10 +63,12 @@ jobs:
         run: cmake -P scripts/download-deps.cmake
 
       - name: Build libobs
-        run: scripts/build-obs-studio-macos.sh 2>&1 | tee Build_libobs.log | xcbeautify
+        env:
+          ENABLE_XCBEAUTIFY: true
+        run: scripts/build-obs-studio-macos.sh
 
       - name: Configure
-        run: cmake --preset macos-ci 2>&1 | tee Configure.log | xcbeautify
+        run: cmake --preset macos-ci
 
       - name: Build
         run: cmake --build --preset macos-ci 2>&1 | tee Build.log | xcbeautify

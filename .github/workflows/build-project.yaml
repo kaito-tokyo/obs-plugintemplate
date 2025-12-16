@@ -61,6 +61,8 @@ jobs:
 
       - name: Download dependencies
         if: steps.libobs-cache.outputs.cache-hit != 'true'
+        env:
+          ENABLE_XCBEAUTIFY: true
         run: cmake -P scripts/download-deps.cmake
 
       - name: Build libobs
@@ -68,7 +70,7 @@ jobs:
         run: scripts/build-obs-studio-macos.sh 2>&1 | tee Build_libobs.log | xcbeautify
 
       - name: Configure
-        run: cmake --preset macos 2>&1 | tee Configure.log | xcbeautify
+        run: cmake --preset macos
 
       - name: Build
         run: cmake --build --preset macos 2>&1 | tee Build.log | xcbeautify
