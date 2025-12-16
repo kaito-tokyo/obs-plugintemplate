@@ -102,7 +102,7 @@ jobs:
             printf '  <options customize="never" require-scripts="false" hostArchitectures="x86_64,arm64"/>\n'
             printf '  <domains enable_localSystem="false" enable_currentUserHome="true" enable_anywhere="false"/>\n'
             printf '  <choices-outline>\n'
-            printf '      <line choice="default"/>\n'
+            printf '    <line choice="default"/>\n'
             printf '  </choices-outline>\n'
             printf '  <choice id="default" title="%s" visible="false">\n' "$DISPLAY_NAME"
             printf '    <pkg-ref id="%s"/>\n' "$BUNDLE_ID"
