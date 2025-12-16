@@ -164,7 +164,7 @@ jobs:
             .deps/include
             .deps/lib
             .deps/obs-studio-${{ fromJson(steps.metadata.outputs.buildspec).dependencies.obs-studio.version }}
-          key: macos-libobs-${{ hashFiles('buildspec.json') }}-${{ runner.arch }}-${{ steps.metadata.outputs.ImageVersion }}
+          key: ${{ runner.os }}-libobs-${{ hashFiles('buildspec.json') }}-${{ runner.arch }}-${{ steps.metadata.outputs.ImageVersion }}
 
       - name: Upload Raw Build Log
         continue-on-error: true
