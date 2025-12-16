@@ -177,29 +177,7 @@ jobs:
 
       - name: Package
         shell: pwsh
-        env:
-          PLUGIN_NAME: ${{ fromJson(steps.metadata.outputs.buildspec).name }}
-          PLUGIN_VERSION: ${{ fromJson(steps.metadata.outputs.buildspec).version }}
-        run: |
-          $InstallDir = "release/package"
-          cmake --install build_x64 --config RelWithDebInfo --prefix $InstallDir
-
-          $SymbolsDir = "release/symbols"
-          New-Item -ItemType Directory -Path $SymbolsDir -Force | Out-Null
-
-          Get-ChildItem -Path $InstallDir -Filter "*.pdb" -Recurse | ForEach-Object {
-              $RelativePath = [System.IO.Path]::GetRelativePath($InstallDir, $_.DirectoryName)
-              $DestDir = Join-Path $SymbolsDir $RelativePath
-              New-Item -ItemType Directory -Path $DestDir -Force | Out-Null
-
-              Move-Item -Path $_.FullName -Destination $DestDir
-          }
-
-          $MainZip = "release/$env:PLUGIN_NAME-$env:PLUGIN_VERSION-windows-x64.zip"
-          Compress-Archive -Path "$InstallDir/*" -DestinationPath $MainZip -Force
-
-          $PdbZip = "release/$env:PLUGIN_NAME-$env:PLUGIN_VERSION-windows-x64-pdb.zip"
-          Compress-Archive -Path "$SymbolsDir/*" -DestinationPath $PdbZip -Force
+        run: ./scripts/package-plugin-windows.ps1
 
       - name: Upload Binary
         uses: actions/upload-artifact@v6
