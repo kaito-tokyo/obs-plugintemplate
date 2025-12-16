@@ -11,7 +11,7 @@ LOG_FILE="${ROOT_DIR}/build_raw.log"
 
 rm -f "$LOG_FILE"
 
-run_cmake() {
+with_xcbeautify() {
     if [[ "$ENABLE_XCBEAUTIFY" == "true" ]] && command -v xcbeautify &> /dev/null; then
         "$@" 2>&1 | tee -a "$LOG_FILE" | xcbeautify
     else
@@ -57,8 +57,7 @@ echo "::endgroup::"
 # ------------------------------------------------------------------------------
 echo "::group::Configure OBS Studio (Universal)"
 
-# run_cmake を経由させることでログが記録されます
-run_cmake cmake -S "$SOURCE_DIR" \
+cmake -S "$SOURCE_DIR" \
       -B "$BUILD_DIR" \
       -G "Xcode" \
       -DCMAKE_OSX_ARCHITECTURES="${CMAKE_OSX_ARCHITECTURES}" \
@@ -77,7 +76,7 @@ echo "::endgroup::"
 # ------------------------------------------------------------------------------
 echo "::group::Build OBS Frontend API (Debug)"
 
-run_cmake cmake --build "$BUILD_DIR" \
+with_xcbeautify cmake --build "$BUILD_DIR" \
       --target obs-frontend-api \
       --config Debug \
       --parallel
@@ -89,7 +88,7 @@ echo "::endgroup::"
 # ------------------------------------------------------------------------------
 echo "::group::Build OBS Frontend API (Release)"
 
-run_cmake cmake --build "$BUILD_DIR" \
+with_xcbeautify cmake --build "$BUILD_DIR" \
       --target obs-frontend-api \
       --config Release \
       --parallel
@@ -101,7 +100,7 @@ echo "::endgroup::"
 # ------------------------------------------------------------------------------
 echo "::group::Install Development Artifacts (Debug)"
 
-run_cmake cmake --install "$BUILD_DIR" \
+cmake --install "$BUILD_DIR" \
       --component Development \
       --config Debug \
       --prefix "$DEPS_DIR"
@@ -113,7 +112,7 @@ echo "::endgroup::"
 # ------------------------------------------------------------------------------
 echo "::group::Install Development Artifacts (Release)"
 
-run_cmake cmake --install "$BUILD_DIR" \
+cmake --install "$BUILD_DIR" \
       --component Development \
       --config Release \
       --prefix "$DEPS_DIR"
