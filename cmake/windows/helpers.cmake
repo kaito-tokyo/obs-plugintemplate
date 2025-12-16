@@ -22,7 +22,7 @@ function(set_target_properties_plugin target)
 
   set_target_properties(${target} PROPERTIES VERSION 0 SOVERSION ${PLUGIN_VERSION})
 
-  install(TARGETS ${target} RUNTIME DESTINATION "obs-plugins/64bit" LIBRARY DESTINATION "${target}/obs-plugins/64bit")
+  install(TARGETS ${target} RUNTIME DESTINATION "obs-plugins/64bit" LIBRARY DESTINATION "obs-plugins/64bit")
 
   install(
     FILES "$<TARGET_PDB_FILE:${target}>"

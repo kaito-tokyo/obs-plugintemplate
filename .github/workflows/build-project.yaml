@@ -42,7 +42,7 @@ jobs:
           echo "ImageVersion=$ImageVersion" >> "$GITHUB_OUTPUT"
 
       - name: Install dependencies via Homebrew
-        run: brew install -q cmake
+        run: brew install -q cmake xcbeautify
 
       - name: Restore libobs cache
         uses: actions/cache/restore@v5
@@ -65,13 +65,13 @@ jobs:
 
       - name: Build libobs
         if: steps.libobs-cache.outputs.cache-hit != 'true'
-        run: scripts/build-obs-studio-macos.sh
+        run: scripts/build-obs-studio-macos.sh 2>&1 | tee Build_libobs.log | xcbeautify
 
       - name: Configure
-        run: cmake --preset macos
+        run: cmake --preset macos 2>&1 | tee Configure.log | xcbeautify
 
       - name: Build
-        run: cmake --build --preset macos
+        run: cmake --build --preset macos 2>&1 | tee Build.log | xcbeautify
 
       - name: Upload Build Artifacts
         uses: actions/upload-artifact@v6
@@ -79,6 +79,14 @@ jobs:
           name: ${{ fromJson(steps.metadata.outputs.buildspec).name }}-bundle-macos-universal-${{ github.run_number }}
           path: build_macos/rundir/RelWithDebInfo/*.plugin
           if-no-files-found: error
+
+      - name: Upload Raw Build Log
+        if: always()
+        continue-on-error: true
+        uses: actions/upload-artifact@v6
+        with:
+          name: ${{ runner.os }}-build-rawlogs-${{ github.run_number }}
+          path: "*.log"
 
   ubuntu-build:
     name: Ubuntu Build
@@ -105,7 +113,6 @@ jobs:
           sudo eatmydata apt-get install -y --no-install-recommends \
             cmake \
             libgles2-mesa-dev \
-            libgtest-dev \
             libqt6svg6-dev \
             libsimde-dev \
             ninja-build \
@@ -165,8 +172,8 @@ jobs:
         run: cmake -P scripts/download-deps.cmake
 
       - name: Build libobs
-        shell: pwsh
         if: steps.libobs-cache.outputs.cache-hit != 'true'
+        shell: pwsh
         run: ./scripts/build-obs-studio-windows.ps1
 
       - name: Configure
@@ -177,29 +184,7 @@ jobs:
 
       - name: Package
         shell: pwsh
-        env:
-          PLUGIN_NAME: ${{ fromJson(steps.metadata.outputs.buildspec).name }}
-          PLUGIN_VERSION: ${{ fromJson(steps.metadata.outputs.buildspec).version }}
-        run: |
-          $InstallDir = "release/package"
-          cmake --install build_x64 --config RelWithDebInfo --prefix $InstallDir
-
-          $SymbolsDir = "release/symbols"
-          New-Item -ItemType Directory -Path $SymbolsDir -Force | Out-Null
-
-          Get-ChildItem -Path $InstallDir -Filter "*.pdb" -Recurse | ForEach-Object {
-              $RelativePath = [System.IO.Path]::GetRelativePath($InstallDir, $_.DirectoryName)
-              $DestDir = Join-Path $SymbolsDir $RelativePath
-              New-Item -ItemType Directory -Path $DestDir -Force | Out-Null
-
-              Move-Item -Path $_.FullName -Destination $DestDir
-          }
-
-          $MainZip = "release/$env:PLUGIN_NAME-$env:PLUGIN_VERSION-windows-x64.zip"
-          Compress-Archive -Path "$InstallDir/*" -DestinationPath $MainZip -Force
-
-          $PdbZip = "release/$env:PLUGIN_NAME-$env:PLUGIN_VERSION-windows-x64-pdb.zip"
-          Compress-Archive -Path "$SymbolsDir/*" -DestinationPath $PdbZip -Force
+        run: ./scripts/package-plugin-windows.ps1
 
       - name: Upload Binary
         uses: actions/upload-artifact@v6

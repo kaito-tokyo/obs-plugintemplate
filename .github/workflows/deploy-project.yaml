@@ -48,31 +48,28 @@ jobs:
           echo "ImageVersion=$ImageVersion" >> "$GITHUB_OUTPUT"
 
       - name: Set up macOS Signing Certificates
+        if: ${{ env.CODESIGN_OK == 'true' }}
         uses: ./.github/actions/setup-macos-codesigning
         id: codesign
-        if: ${{ env.CODESIGN_OK == 'true' }}
         with:
           MACOS_SIGNING_APPLICATION_IDENTITY: ${{ secrets.MACOS_SIGNING_APPLICATION_IDENTITY }}
           MACOS_SIGNING_CERT: ${{ secrets.MACOS_SIGNING_CERT }}
           MACOS_SIGNING_CERT_PASSWORD: ${{ secrets.MACOS_SIGNING_CERT_PASSWORD }}
 
       - name: Install dependencies via Homebrew
-        run: brew install -q cmake
+        run: brew install -q cmake xcbeautify
 
       - name: Download dependencies
         run: cmake -P scripts/download-deps.cmake
 
       - name: Build libobs
-        run: scripts/build-obs-studio-macos.sh
+        run: scripts/build-obs-studio-macos.sh 2>&1 | tee Build_libobs.log | xcbeautify
 
       - name: Configure
-        env:
-          CODESIGN_IDENT: ${{ steps.codesign.outputs.CODESIGN_IDENT }}
-          CODESIGN_TEAM: ${{ steps.codesign.outputs.CODESIGN_TEAM }}
-        run: cmake --preset macos-ci
+        run: cmake --preset macos-ci 2>&1 | tee Configure.log | xcbeautify
 
       - name: Build
-        run: cmake --build --preset macos-ci
+        run: cmake --build --preset macos-ci 2>&1 | tee Build.log | xcbeautify
 
       - name: Package
         env:
@@ -102,7 +99,7 @@ jobs:
             printf '  <options customize="never" require-scripts="false" hostArchitectures="x86_64,arm64"/>\n'
             printf '  <domains enable_localSystem="false" enable_currentUserHome="true" enable_anywhere="false"/>\n'
             printf '  <choices-outline>\n'
-            printf '      <line choice="default"/>\n'
+            printf '    <line choice="default"/>\n'
             printf '  </choices-outline>\n'
             printf '  <choice id="default" title="%s" visible="false">\n' "$DISPLAY_NAME"
             printf '    <pkg-ref id="%s"/>\n' "$BUNDLE_ID"
@@ -156,8 +153,9 @@ jobs:
           if-no-files-found: error
 
       - name: Save libobs cache
-        uses: actions/cache/save@v5
+        if: "!startsWith(github.ref, 'refs/tags/')"
         continue-on-error: true
+        uses: actions/cache/save@v5
         with:
           path: |
             .deps/Frameworks
@@ -165,6 +163,14 @@ jobs:
             .deps/lib
             .deps/obs-studio-${{ fromJson(steps.metadata.outputs.buildspec).dependencies.obs-studio.version }}
           key: macos-libobs-${{ hashFiles('buildspec.json') }}-${{ runner.arch }}-${{ steps.metadata.outputs.ImageVersion }}
+
+      - name: Upload Raw Build Log
+        continue-on-error: true
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: ${{ runner.os }}-deploy-rawlogs-${{ github.run_number }}
+          path: "*.log"
 
   ubuntu-deploy:
     name: Ubuntu Deploy
@@ -198,7 +204,6 @@ jobs:
           sudo eatmydata apt-get install -y --no-install-recommends \
             cmake \
             libgles2-mesa-dev \
-            libgtest-dev \
             libqt6svg6-dev \
             libsimde-dev \
             ninja-build \
@@ -273,29 +278,7 @@ jobs:
 
       - name: Package
         shell: pwsh
-        env:
-          PLUGIN_NAME: ${{ fromJson(steps.metadata.outputs.buildspec).name }}
-          PLUGIN_VERSION: ${{ fromJson(steps.metadata.outputs.buildspec).version }}
-        run: |
-          $InstallDir = "release/package"
-          cmake --install build_x64 --config RelWithDebInfo --prefix $InstallDir
-
-          $SymbolsDir = "release/symbols"
-          New-Item -ItemType Directory -Path $SymbolsDir -Force | Out-Null
-
-          Get-ChildItem -Path $InstallDir -Filter "*.pdb" -Recurse | ForEach-Object {
-              $RelativePath = [System.IO.Path]::GetRelativePath($InstallDir, $_.DirectoryName)
-              $DestDir = Join-Path $SymbolsDir $RelativePath
-              New-Item -ItemType Directory -Path $DestDir -Force | Out-Null
-
-              Move-Item -Path $_.FullName -Destination $DestDir
-          }
-
-          $MainZip = "release/$env:PLUGIN_NAME-$env:PLUGIN_VERSION-windows-x64.zip"
-          Compress-Archive -Path "$InstallDir/*" -DestinationPath $MainZip -Force
-
-          $PdbZip = "release/$env:PLUGIN_NAME-$env:PLUGIN_VERSION-windows-x64-pdb.zip"
-          Compress-Archive -Path "$SymbolsDir/*" -DestinationPath $PdbZip -Force
+        run: ./scripts/package-plugin-windows.ps1
 
       - name: Upload Binary
         uses: actions/upload-artifact@v6
@@ -310,6 +293,7 @@ jobs:
           path: release/${{ fromJson(steps.metadata.outputs.buildspec).name }}-${{ fromJson(steps.metadata.outputs.buildspec).version }}-windows-x64-pdb.zip
 
       - name: Save libobs cache
+        if: "!startsWith(github.ref, 'refs/tags/')"
         uses: actions/cache/save@v5
         id: libobs-cache
         with:
@@ -324,9 +308,9 @@ jobs:
   create-release:
     name: Create Release
 
-    runs-on: ubuntu-24.04
     if: startsWith(github.ref, 'refs/tags/')
-    needs: [macos-deploy, ubuntu-deploy, windows-deploy ]
+    runs-on: ubuntu-24.04
+    needs: [macos-deploy, ubuntu-deploy, windows-deploy]
 
     permissions:
       contents: write
@@ -382,16 +366,17 @@ jobs:
         run: |
           TAG_NAME=${GITHUB_REF#refs/tags/}
 
+          gh release delete "$TAG_NAME" --yes || true
+
           PRERELEASE_FLAG=""
           if [[ "$TAG_NAME" == *"-"* ]]; then
             PRERELEASE_FLAG="--prerelease"
           fi
 
           gh release create "$TAG_NAME" \
-            $PLUGIN_NAME-*.pkg \
-            $PLUGIN_NAME-*.dSYM.zip \
-            $PLUGIN_NAME-*.deb \
             $PLUGIN_NAME-*.ddeb \
+            $PLUGIN_NAME-*.deb \
+            $PLUGIN_NAME-*.pkg \
             $PLUGIN_NAME-*.zip \
             --draft \
             --generate-notes \
