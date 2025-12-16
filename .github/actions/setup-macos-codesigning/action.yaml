@@ -11,27 +11,9 @@ inputs:
     description: Password for the .p12 certificate
     required: true
 
-outputs:
-  CODESIGN_IDENT:
-    description: The full signing identity
-    value: ${{ steps.extract.outputs.CODESIGN_IDENT }}
-  CODESIGN_TEAM:
-    description: The Team ID
-    value: ${{ steps.extract.outputs.CODESIGN_TEAM }}
-
 runs:
   using: "composite"
   steps:
-    - name: Extract Codesign Identity
-      id: extract
-      if: ${{ inputs.MACOS_SIGNING_APPLICATION_IDENTITY != '' }}
-      shell: bash
-      env:
-        MACOS_SIGNING_APPLICATION_IDENTITY: ${{ inputs.MACOS_SIGNING_APPLICATION_IDENTITY }}
-      run: |
-        echo "CODESIGN_IDENT=$MACOS_SIGNING_APPLICATION_IDENTITY" >> "$GITHUB_OUTPUT"
-        awk -F'[()]' '{ print "CODESIGN_TEAM=" $2 }' <<< "$MACOS_SIGNING_APPLICATION_IDENTITY" >> "$GITHUB_OUTPUT"
-
     - name: Import Signing Certificate
       if: ${{ inputs.MACOS_SIGNING_APPLICATION_IDENTITY != '' }}
       shell: bash

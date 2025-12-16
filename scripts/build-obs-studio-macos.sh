@@ -2,6 +2,24 @@
 set -euo pipefail
 
 # ------------------------------------------------------------------------------
+# 0. Configuration & Helper Function
+# ------------------------------------------------------------------------------
+ENABLE_XCBEAUTIFY="${ENABLE_XCBEAUTIFY:-false}"
+
+ROOT_DIR="$(cd "$(dirname "$0")"/.. && pwd)"
+LOG_FILE="${ROOT_DIR}/build_raw.log"
+
+rm -f "$LOG_FILE"
+
+with_xcbeautify() {
+    if [[ "$ENABLE_XCBEAUTIFY" == "true" ]] && command -v xcbeautify &> /dev/null; then
+        "$@" 2>&1 | tee -a "$LOG_FILE" | xcbeautify
+    else
+        "$@"
+    fi
+}
+
+# ------------------------------------------------------------------------------
 # 1. Setup Phase
 # ------------------------------------------------------------------------------
 echo "::group::Initialize and Check Dependencies"
@@ -9,7 +27,6 @@ echo "::group::Initialize and Check Dependencies"
 CMAKE_OSX_ARCHITECTURES="arm64;x86_64"
 CMAKE_OSX_DEPLOYMENT_TARGET="12.0"
 
-ROOT_DIR="$(cd "$(dirname "$0")"/.. && pwd)"
 DEPS_DIR="${ROOT_DIR}/.deps"
 
 if [[ ! -f "${DEPS_DIR}/.deps_versions" ]]; then
@@ -59,7 +76,7 @@ echo "::endgroup::"
 # ------------------------------------------------------------------------------
 echo "::group::Build OBS Frontend API (Debug)"
 
-cmake --build "$BUILD_DIR" \
+with_xcbeautify cmake --build "$BUILD_DIR" \
       --target obs-frontend-api \
       --config Debug \
       --parallel
@@ -71,7 +88,7 @@ echo "::endgroup::"
 # ------------------------------------------------------------------------------
 echo "::group::Build OBS Frontend API (Release)"
 
-cmake --build "$BUILD_DIR" \
+with_xcbeautify cmake --build "$BUILD_DIR" \
       --target obs-frontend-api \
       --config Release \
       --parallel
@@ -101,4 +118,5 @@ cmake --install "$BUILD_DIR" \
       --prefix "$DEPS_DIR"
 
 echo "Install done. Artifacts are in $DEPS_DIR"
+echo "Raw build log is saved to $LOG_FILE"
 echo "::endgroup::"
