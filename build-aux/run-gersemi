@@ -1,1 +1,4 @@
-.run-format.zsh
+#!/bin/bash
+shopt -s globstar
+shopt -s extglob
+echo "src/plugin-main.cpp" | gersemi "$@" -

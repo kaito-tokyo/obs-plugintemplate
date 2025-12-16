@@ -46,4 +46,4 @@ jobs:
 
       - name: Run Gersemi Lint
         run: |
-          gersemi --check .
+          ./build-aux/run-gersemi
