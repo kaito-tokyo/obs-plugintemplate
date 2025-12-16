@@ -5,6 +5,8 @@ include(init)
 
 project(${PLUGIN_NAME} VERSION ${PLUGIN_VERSION} LANGUAGES C CXX)
 
+option(BUILD_TESTING "Build test cases" ON)
+
 if(MSVC)
   list(PREPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/windows")
 elseif(APPLE)
@@ -82,3 +84,7 @@ else()
 endif()
 
 set_target_properties_plugin(${CMAKE_PROJECT_NAME} PROPERTIES OUTPUT_NAME ${CMAKE_PROJECT_NAME})
+
+if(BUILD_TESTING)
+  enable_testing()
+endif()
