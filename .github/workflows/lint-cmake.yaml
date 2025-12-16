@@ -35,8 +35,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v6
 
-      - name: Install gersemi
-        run: brew install -q obsproject/tools/gersemi
+      - name: Set up gersemi
+        run: |
+          echo "/home/linuxbrew/.linuxbrew/bin:/home/linuxbrew/.linuxbrew/sbin" >> $GITHUB_PATH
+          brew install -q obsproject/tools/gersemi
 
       - name: Run Gersemi Lint
         run: |
