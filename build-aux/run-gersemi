@@ -1,4 +1,11 @@
 #!/bin/bash
-shopt -s globstar
-shopt -s extglob
-echo "src/plugin-main.cpp" | gersemi "$@" -
+IFS=$'\n'
+include_files=(
+  CMakeLists.txt
+  $(find cmake -name "*.cmake")
+  $(find src -name "CMakeLists.txt")
+)
+unset IFS
+if [[ ${#include_files[@]} -gt 0 ]]; then
+  gersemi "$@" "${include_files[@]}"
+fi
