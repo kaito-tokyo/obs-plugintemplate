@@ -164,8 +164,8 @@ jobs:
         run: cmake -P scripts/download-deps.cmake
 
       - name: Build libobs
-        shell: pwsh
         if: steps.libobs-cache.outputs.cache-hit != 'true'
+        shell: pwsh
         run: ./scripts/build-obs-studio-windows.ps1
 
       - name: Configure
