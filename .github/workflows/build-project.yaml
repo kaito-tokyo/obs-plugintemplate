@@ -12,16 +12,15 @@ defaults:
   run:
     shell: bash
 
-permissions:
-  contents: read
-
 jobs:
   macos-build:
     name: macOS Build
 
     runs-on: macos-15
-
     timeout-minutes: 30
+
+    permissions:
+      contents: read
 
     steps:
       - name: Checkout
@@ -82,8 +81,10 @@ jobs:
     name: Ubuntu Build
 
     runs-on: ubuntu-24.04
-
     timeout-minutes: 30
+
+    permissions:
+      contents: read
 
     steps:
       - name: Checkout
