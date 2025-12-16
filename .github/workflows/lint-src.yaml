@@ -39,9 +39,9 @@ jobs:
         run: |
           echo "/home/linuxbrew/.linuxbrew/bin:/home/linuxbrew/.linuxbrew/sbin" >> $GITHUB_PATH
 
-      - name: Set up gersemi
+      - name: Set up Clang Format
         run: |
-          brew install -q obsproject/tools/clang-format-19
+          brew install -q obsproject/tools/clang-format@19
 
       - name: Run Clang Format Lint
         run: |
