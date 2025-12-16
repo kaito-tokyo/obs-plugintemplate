@@ -58,7 +58,6 @@ find_package(obs-frontend-api REQUIRED)
 find_package(Qt6 COMPONENTS Widgets Core REQUIRED)
 
 set(PLUGIN_SOURCES src/plugin-main.cpp)
-set(PLUGIN_LOCALE_RESOURCES data/locale/en-US.ini)
 
 add_library(${CMAKE_PROJECT_NAME} MODULE ${PLUGIN_SOURCES})
 target_link_libraries(${CMAKE_PROJECT_NAME} OBS::libobs OBS::obs-frontend-api Qt6::Widgets Qt6::Core)
@@ -66,9 +65,6 @@ target_link_libraries(${CMAKE_PROJECT_NAME} OBS::libobs OBS::obs-frontend-api Qt
 set_target_properties_plugin(${CMAKE_PROJECT_NAME} PROPERTIES OUTPUT_NAME ${CMAKE_PROJECT_NAME})
 
 if(APPLE)
-  target_sources(${CMAKE_PROJECT_NAME} PRIVATE ${PLUGIN_LOCALE_RESOURCES})
-  set_source_files_properties(${PLUGIN_LOCALE_RESOURCES} PROPERTIES MACOSX_PACKAGE_LOCATION "Resources/locale")
-
   set_target_properties(
     ${CMAKE_PROJECT_NAME}
     PROPERTIES XCODE_ATTRIBUTE_LD_RUNPATH_SEARCH_PATHS "@loader_path/../Frameworks"
