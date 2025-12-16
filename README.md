@@ -4,14 +4,14 @@
 
 The plugin template is meant to be used as a starting point for OBS Studio plugin development. It includes:
 
-* Boilerplate plugin source code
-* A CMake project file
-* GitHub Actions workflows and repository actions
+- Boilerplate plugin source code
+- A CMake project file
+- GitHub Actions workflows and repository actions
 
 ## Supported Build Environments
 
 | Platform | Environment           |
-|----------|-----------------------|
+| -------- | --------------------- |
 | Windows  | Visual Studio 17 2022 |
 | macOS    | Xcode 16              |
 | Ubuntu   | Ubuntu 24.04          |
@@ -24,8 +24,8 @@ This project utilizes **CMake Presets** to simplify the configuration and build 
 
 Ensure the following tools are installed on your system:
 
-* **CMake** (3.28 or newer)
-* **C++ Compiler** (Visual Studio 2022, Xcode 16, or GCC/Clang)
+- **CMake** (3.28 or newer)
+- **C++ Compiler** (Visual Studio 2022, Xcode 16, or GCC/Clang)
 
 ### 2. Build Instructions
 
@@ -38,7 +38,7 @@ Run the helper script to download OBS Studio headers, Qt6, and other pre-built d
 
 ```bash
 cmake -P scripts/download-deps.cmake
-````
+```
 
 **Ubuntu:**
 Install the required packages via `apt`.
@@ -109,8 +109,8 @@ sudo cmake --install build_x86_64 --prefix /usr
 
 Packaging is handled automatically via GitHub Actions. The repository includes configured workflows for Continuous Integration and Continuous Delivery (CI/CD):
 
-  * **Build**: Triggered on push to `main` and `master` and Pull Requests.
-  * **Release**: Triggered when a tag is pushed (e.g., `1.0.0`). This workflow builds, signs, and creates a Draft Release with artifacts.
+- **Build**: Triggered on push to `main` and `master` and Pull Requests.
+- **Release**: Triggered when a tag is pushed (e.g., `1.0.0`). This workflow builds, signs, and creates a Draft Release with artifacts.
 
 ## macOS Code Signing and Notarization
 
@@ -120,6 +120,6 @@ For information regarding macOS code signing and notarization setup (required fo
 
 Comprehensive documentation is available in the [Plugin Template Wiki](https://github.com/obsproject/obs-plugintemplate/wiki).
 
-  * [Getting Started](https://github.com/obsproject/obs-plugintemplate/wiki/Getting-Started)
-  * [Build System Requirements](https://github.com/obsproject/obs-plugintemplate/wiki/Build-System-Requirements)
-  * [CMake Build System Options](https://github.com/obsproject/obs-plugintemplate/wiki/CMake-Build-System-Options)
+- [Getting Started](https://github.com/obsproject/obs-plugintemplate/wiki/Getting-Started)
+- [Build System Requirements](https://github.com/obsproject/obs-plugintemplate/wiki/Build-System-Requirements)
+- [CMake Build System Options](https://github.com/obsproject/obs-plugintemplate/wiki/CMake-Build-System-Options)
